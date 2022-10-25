@@ -66,9 +66,7 @@ h2 = 10**5; # feedback on dcc div
 l_vec =  [0,  0, l_w, l_s, l_w , l_s , 0 ,0 ,l_w,l_w,l_s,l_s];
 h1_vec = [0, h1, 0  , 0  , h1  , h1  , h1,0 ,h1 ,0  , h1, 0 ];
 h2_vec = [0, h2, 0  , 0  , h2  , h2  , 0 ,h2,0  ,h2 , 0 , h2];
-h1a = 1e3;
-# ss
-load_temp = [1];#np.arange(12).tolist();#[1,3,5,6,7,10,11];#np.arange(12).tolist();
+h1a = 0;
 
 
 #[1,6,7] had...the same stability behaviour/eigenvalue plots
@@ -89,11 +87,22 @@ comp_dir = str(C[0])+"_reprog";
 fix_str= str(Doses[-1])+"Gy"
 comp_list = C;
 unit = ' Gy';
-T_stop = 5000;
+T_stop = 2000;
 #lll_load = 6;
+step = 1;
 
-deathFdbkQ = True;
+# ss
+load_temp = [0,1,6,7];#np.arange(12).tolist();#[1,3,5,6,7,10,11];#np.arange(12).tolist();
+deathFdbkQ = False;
 death_r2_mult = 1.1;
+log_yscaleQ = True;
+if log_yscaleQ:
+    log_str = " (log)";
+    log_dir = "\\log_yscale\\";
+else:
+    log_str = "";
+    log_dir = "\\linear_yscale\\"
+    
 if deathFdbkQ:
     hd = 32520.32520325203;#1e5; 
     deathFdbk_str = "_w_death_fdbk";
@@ -113,11 +122,14 @@ l_s = 10**3; # strong feedback on prob
 h1 = 10**5; # feedback on css div 
 h2 = 10**5; # feedback on dcc div
 d = r2/5;
+dsc = 0;
+
 compBaselineQ = False;
+showReprogQ = True;
 showNonReprogQ = True;
 schedChangeQ = False;
 use_muQ = True;
-use_insetsQ = True;
+use_insetsQ = False;
 if use_muQ:
     #, 1e3,np.infty]
     # sig_vec = [10];#list(map(lambda p: 1 * 10 ** (p), np.arange(0,3).tolist()));
@@ -133,7 +145,7 @@ if use_muQ:
     s_xi3_vec = ['\\' + str(els) for els in xi3_vec];
     s_sig_vec = ['\\' + str(el) for el in sig_vec];
     s_rho_vec = ['\\' + str(elb) + '\\' for elb in rho_vec];
-    case = 'test\\8_Aug';#'mathCheck\\2_Feb'#'reversionAttempt4\\14_Nov';#'muNN-l2b\\2_Nov';#'baseline\\31_Oct';
+    case = 'reversal\\21_Oct';#'mathCheck\\2_Feb'#'reversionAttempt4\\14_Nov';#'muNN-l2b\\2_Nov';#'baseline\\31_Oct';
 else:
     sig_vec=[0];
     s_sig_vec = ['\\0\\'];
@@ -188,13 +200,7 @@ for lll_load in load_temp:
                             dataN[nn][tt][uu][ss][ww][vv][lll_load] = np.loadtxt(base_dir1 + s_mu_str + plotn_str2 + ".txt");
 
 #T_stop_inset = 200;
-log_yscaleQ = False;
-if log_yscaleQ:
-    log_str = " (log)";
-    log_dir = "\\log_yscale\\";
-else:
-    log_str = "";
-    log_dir = "\\linear_yscale\\"
+
 #T_stop = 15000;
 T_stop = T_stop - 100;
 T_stop_inset = 200;
@@ -251,16 +257,17 @@ if use_muQ:
                                 s_sig = '(σ='+str(el) +')';
                                 s_title_tweakable = s_xi1+s_xi2+s_beta+s_sig;
                                 st2_stop = np.flatnonzero(data2[nn][tt][uu][ss][ww][vv][lll_load][0] < T_stop).max();
-                                axCellNo[0,0].plot(data2[nn][tt][uu][ss][ww][vv][lll_load][0,:st2_stop],data2[nn][tt][uu][ss][ww][vv][lll_load][1,:st2_stop] * total_cell_num,'--',color=COL2.get_rgb(nn),label='CSC '+s_lgd_0+'_'+str(lll_load))
-                                axCellNo[0,1].plot(data2[nn][tt][uu][ss][ww][vv][lll_load][0,:st2_stop],data2[nn][tt][uu][ss][ww][vv][lll_load][2,:st2_stop] * total_cell_num,'-',color=COL2.get_rgb(nn),label='DCC '+s_lgd_0+s_sig+'_'+str(lll_load))
+                                if showReprogQ:
+                                    axCellNo[0,0].plot(data2[nn][tt][uu][ss][ww][vv][lll_load][0,:st2_stop:step],data2[nn][tt][uu][ss][ww][vv][lll_load][1,:st2_stop:step] * total_cell_num,'--',color=COL2.get_rgb(nn),label='CSC '+s_lgd_0+'_'+str(lll_load))
+                                    axCellNo[0,1].plot(data2[nn][tt][uu][ss][ww][vv][lll_load][0,:st2_stop:step],data2[nn][tt][uu][ss][ww][vv][lll_load][2,:st2_stop:step] * total_cell_num,'-',color=COL2.get_rgb(nn),label='DCC '+s_lgd_0+s_sig+'_'+str(lll_load))
                                 if showNonReprogQ:
                                     st1_stop = np.flatnonzero(data1[nn][tt][uu][ss][ww][vv][lll_load][0] < T_stop).max();
-                                    axCellNo[0,0].plot(data1[nn][tt][uu][ss][ww][vv][lll_load][0,:st1_stop]+EOT_diff,data1[nn][tt][uu][ss][ww][vv][lll_load][1,:st1_stop] * total_cell_num,'--',color=COL1.get_rgb(nn),label='CSC '+s_lgd_1+s_sig+'_'+str(lll_load))
-                                    axCellNo[0,1].plot(data1[nn][tt][uu][ss][ww][vv][lll_load][0,:st1_stop]+EOT_diff,data1[nn][tt][uu][ss][ww][vv][lll_load][2,:st1_stop] * total_cell_num,'-',color=COL1.get_rgb(nn),label='DCC '+s_lgd_1+s_sig+'_'+str(lll_load))
+                                    axCellNo[0,0].plot(data1[nn][tt][uu][ss][ww][vv][lll_load][0,:st1_stop:step]+EOT_diff,data1[nn][tt][uu][ss][ww][vv][lll_load][1,:st1_stop:step] * total_cell_num,'--',color=COL1.get_rgb(nn),label='CSC '+s_lgd_1+s_sig+'_'+str(lll_load))
+                                    axCellNo[0,1].plot(data1[nn][tt][uu][ss][ww][vv][lll_load][0,:st1_stop:step]+EOT_diff,data1[nn][tt][uu][ss][ww][vv][lll_load][2,:st1_stop:step] * total_cell_num,'-',color=COL1.get_rgb(nn),label='DCC '+s_lgd_1+s_sig+'_'+str(lll_load))
                         
         st0_stop = np.flatnonzero(dataN[nn][tt][uu][ss][ww][vv][lll_load][0] < T_stop).max();
-        axCellNo[0,0].plot(dataN[nn][tt][uu][ss][ww][vv][lll_load][0,:st0_stop],dataN[nn][tt][uu][ss][ww][vv][lll_load][1,:st0_stop] * total_cell_num,'g--',label='CSC, no treatment_'+str(lll_load))
-        axCellNo[0,1].plot(dataN[nn][tt][uu][ss][ww][vv][lll_load][0,:st0_stop],dataN[nn][tt][uu][ss][ww][vv][lll_load][2,:st0_stop] * total_cell_num,'g-',label='DCC, no treatment_'+str(lll_load))
+        axCellNo[0,0].plot(dataN[nn][tt][uu][ss][ww][vv][lll_load][0,:st0_stop:step],dataN[nn][tt][uu][ss][ww][vv][lll_load][1,:st0_stop:step] * total_cell_num,'g--',label='CSC, no treatment_'+str(lll_load))
+        axCellNo[0,1].plot(dataN[nn][tt][uu][ss][ww][vv][lll_load][0,:st0_stop:step],dataN[nn][tt][uu][ss][ww][vv][lll_load][2,:st0_stop:step] * total_cell_num,'g-',label='DCC, no treatment_'+str(lll_load))
         axCellNo[0,0].legend(fancybox=True, framealpha=0.5);
         axCellNo[0,0].set_ylabel("CSC Cell Number"+log_str)#,fontsize=2*ticksize)
         axCellNo[0,0].set_xlabel("time (days)")#,fontsize=2*ticksize)
@@ -280,13 +287,13 @@ if use_muQ:
         if use_insetsQ:
             st2_stop = np.flatnonzero(data2[nn][tt][uu][ss][ww][vv][lll_load][0] < T_stop_inset).max();
             axCellNo00 = figCellNo.add_axes([x1, y1, width, height])
-    
-            axCellNo00.plot(data2[nn][tt][uu][ss][ww][vv][lll_load][0,:st2_stop],data2[nn][tt][uu][ss][ww][vv][lll_load][1,:st2_stop] * total_cell_num,'--',color=COL2.get_rgb(nn),label='CSC '+s_lgd_0+'_'+str(lll_load))
+            if showReprogQ:
+                axCellNo00.plot(data2[nn][tt][uu][ss][ww][vv][lll_load][0,:st2_stop:step],data2[nn][tt][uu][ss][ww][vv][lll_load][1,:st2_stop:step] * total_cell_num,'--',color=COL2.get_rgb(nn),label='CSC '+s_lgd_0+'_'+str(lll_load))
             if showNonReprogQ:
                 st1_stop = np.flatnonzero(data1[nn][tt][uu][ss][ww][vv][lll_load][0] < T_stop_inset).max();
-                axCellNo00.plot(data1[nn][tt][uu][ss][ww][vv][lll_load][0,:st2_stop]+EOT_diff,data1[nn][tt][uu][ss][ww][vv][lll_load][1,:st1_stop] * total_cell_num,'--',color=COL1.get_rgb(nn),label='CSC '+s_lgd_1+s_sig+'_'+str(lll_load))
+                axCellNo00.plot(data1[nn][tt][uu][ss][ww][vv][lll_load][0,:st2_stop:step]+EOT_diff,data1[nn][tt][uu][ss][ww][vv][lll_load][1,:st1_stop:step] * total_cell_num,'--',color=COL1.get_rgb(nn),label='CSC '+s_lgd_1+s_sig+'_'+str(lll_load))
             st0_stop = np.flatnonzero(dataN[nn][tt][uu][ss][ww][vv][lll_load][0] < T_stop_inset).max()+1;
-            axCellNo00.plot(dataN[nn][tt][uu][ss][ww][vv][lll_load][0,:st0_stop],dataN[nn][tt][uu][ss][ww][vv][lll_load][1,:st0_stop] * total_cell_num,'g--',label='CSC, no treatment_'+str(lll_load))
+            axCellNo00.plot(dataN[nn][tt][uu][ss][ww][vv][lll_load][0,:st0_stop:step],dataN[nn][tt][uu][ss][ww][vv][lll_load][1,:st0_stop:step] * total_cell_num,'g--',label='CSC, no treatment_'+str(lll_load))
             axCellNo00.set_yscale('log')
             axCellNo00.tick_params(axis='both', which='major',labelsize=ticksize)
     
@@ -294,29 +301,29 @@ if use_muQ:
     
             axCellNo01 = figCellNo.add_axes([x2, y1, width, height]);
             st2_stop = np.flatnonzero(data2[nn][tt][uu][ss][ww][vv][lll_load][0] < T_stop_inset).max();
-            axCellNo01.plot(data2[nn][tt][uu][ss][ww][vv][lll_load][0,:st2_stop],data2[nn][tt][uu][ss][ww][vv][lll_load][2,:st2_stop] * total_cell_num,'--',color=COL2.get_rgb(nn),label='DCC '+s_lgd_0+'_'+str(lll_load))
+            if showReprogQ:
+                axCellNo01.plot(data2[nn][tt][uu][ss][ww][vv][lll_load][0,:st2_stop:step],data2[nn][tt][uu][ss][ww][vv][lll_load][2,:st2_stop:step] * total_cell_num,'--',color=COL2.get_rgb(nn),label='DCC '+s_lgd_0+'_'+str(lll_load))
     
             if showNonReprogQ:
                 st1_stop = np.flatnonzero(data1[nn][tt][uu][ss][ww][vv][lll_load][0] < T_stop_inset).max();
-                axCellNo01.plot(data1[nn][tt][uu][ss][ww][vv][lll_load][0,:st2_stop]+EOT_diff,data1[nn][tt][uu][ss][ww][vv][lll_load][2,:st1_stop] * total_cell_num,'-.',color=COL1.get_rgb(nn),label='DCC '+s_lgd_1+s_sig+'_'+str(lll_load))
+                axCellNo01.plot(data1[nn][tt][uu][ss][ww][vv][lll_load][0,:st2_stop:step]+EOT_diff,data1[nn][tt][uu][ss][ww][vv][lll_load][2,:st1_stop:step] * total_cell_num,'-.',color=COL1.get_rgb(nn),label='DCC '+s_lgd_1+s_sig+'_'+str(lll_load))
             st0_stop = np.flatnonzero(dataN[nn][tt][uu][ss][ww][vv][lll_load][0] < T_stop_inset).max()+1;
             axCellNo01.plot(dataN[nn][tt][uu][ss][ww][vv][lll_load][0,:st0_stop+1],dataN[nn][tt][uu][ss][ww][vv][lll_load][2,:st0_stop+1] * total_cell_num,'g--',label='DCC, no treatment_'+str(lll_load))
             axCellNo01.set_yscale('log')
             axCellNo01.tick_params(axis='both', which='major',labelsize=ticksize)
         
             # figCellNo
-            st0_stop = np.flatnonzero(dataN[nn][tt][uu][ss][ww][vv][lll_load][0] < T_stop).max();
-            axCellNo[1,0].plot(dataN[nn][tt][uu][ss][ww][vv][lll_load][0,:st0_stop],(dataN[nn][tt][uu][ss][ww][vv][lll_load][1,:st0_stop]+dataN[nn][tt][uu][ss][ww][vv][lll_load][2,:st0_stop]) * total_cell_num,color[2]+'--',label='total, no treatment_'+str(lll_load))
     
             axCellNo10 = figCellNo.add_axes([x1, y2, width, height]);
             st2_stop = np.flatnonzero(data2[nn][tt][uu][ss][ww][vv][lll_load][0] < T_stop_inset).max();
-            axCellNo10.plot(data2[nn][tt][uu][ss][ww][vv][lll_load][0,:st2_stop],(data2[nn][tt][uu][ss][ww][vv][lll_load][2,:st2_stop]+data2[nn][tt][uu][ss][ww][vv][lll_load][1,:st2_stop]) * total_cell_num,'--',color=COL2.get_rgb(nn),label='DCC '+s_lgd_0+'_'+str(lll_load))
+            if showReprogQ:
+                 axCellNo10.plot(data2[nn][tt][uu][ss][ww][vv][lll_load][0,:st2_stop:step],(data2[nn][tt][uu][ss][ww][vv][lll_load][2,:st2_stop:step]+data2[nn][tt][uu][ss][ww][vv][lll_load][1,:st2_stop:step]) * total_cell_num,'--',color=COL2.get_rgb(nn),label='DCC '+s_lgd_0+'_'+str(lll_load))
     
             if showNonReprogQ:
                 st1_stop = np.flatnonzero(data1[nn][tt][uu][ss][ww][vv][lll_load][0] < T_stop_inset).max();
-                axCellNo10.plot(data1[nn][tt][uu][ss][ww][vv][lll_load][0,:st2_stop]+EOT_diff,(data1[nn][tt][uu][ss][ww][vv][lll_load][2,:st1_stop]+data1[nn][tt][uu][ss][ww][vv][lll_load][1,:st1_stop]) * total_cell_num,'-.',color=COL1.get_rgb(nn),label='DCC '+s_lgd_1+s_sig+'_'+str(lll_load))
+                axCellNo10.plot(data1[nn][tt][uu][ss][ww][vv][lll_load][0,:st2_stop:step]+EOT_diff,(data1[nn][tt][uu][ss][ww][vv][lll_load][2,:st1_stop:step]+data1[nn][tt][uu][ss][ww][vv][lll_load][1,:st1_stop:step]) * total_cell_num,'-.',color=COL1.get_rgb(nn),label='DCC '+s_lgd_1+s_sig+'_'+str(lll_load))
             st0_stop = np.flatnonzero(dataN[nn][tt][uu][ss][ww][vv][lll_load][0] < T_stop_inset).max()+1;
-            axCellNo10.plot(dataN[nn][tt][uu][ss][ww][vv][lll_load][0,:st0_stop],(dataN[nn][tt][uu][ss][ww][vv][lll_load][2,:st0_stop]+dataN[nn][tt][uu][ss][ww][vv][lll_load][1,:st0_stop]) * total_cell_num,'g--',label='DCC, no treatment_'+str(lll_load))
+            axCellNo10.plot(dataN[nn][tt][uu][ss][ww][vv][lll_load][0,:st0_stop:step],(dataN[nn][tt][uu][ss][ww][vv][lll_load][2,:st0_stop:step]+dataN[nn][tt][uu][ss][ww][vv][lll_load][1,:st0_stop:step]) * total_cell_num,'g--',label='DCC, no treatment_'+str(lll_load))
             axCellNo10.set_yscale('log')
             axCellNo10.tick_params(axis='both', which='major')
         # if saveQ:
@@ -341,17 +348,19 @@ if use_muQ:
                             
                             if log_yscaleQ:
                                 axCellNo[1,0].set_yscale('log')
-                            axCellNo[1,0].plot(data2[nn][tt][uu][ss][ww][vv][lll_load][0,:st2_stop],(data2[nn][tt][uu][ss][ww][vv][lll_load][1,:st2_stop]+data2[nn][tt][uu][ss][ww][vv][lll_load][2,:st2_stop]) * total_cell_num,'--',color=COL2.get_rgb(nn),label='total '+s_lgd_0+s_sig+'_'+str(lll_load))
+                            if showReprogQ:
+                                axCellNo[1,0].plot(data2[nn][tt][uu][ss][ww][vv][lll_load][0,:st2_stop:step],(data2[nn][tt][uu][ss][ww][vv][lll_load][1,:st2_stop:step]+data2[nn][tt][uu][ss][ww][vv][lll_load][2,:st2_stop:step]) * total_cell_num,'--',color=COL2.get_rgb(nn),label='total '+s_lgd_0+s_sig+'_'+str(lll_load))
                             axCellNo[1,0].set_ylabel("Total Cell Number"+log_str)#,fontsize=2*ticksize)
                             axCellNo[1,0].set_xlabel("time (days)")#,fontsize=2*ticksize)
                             #axCellNo[1,0].set_title(s_title)#,fontsize=2.5*ticksize)
                             #axCellNo[1,0].tick_params(axis='both', which='major',labelsize=1.5*ticksize)
                             if showNonReprogQ:
                                 st1_stop = np.flatnonzero(data1[nn][tt][uu][ss][ww][vv][lll_load][0] < T_stop).max();
-                                axCellNo[1,0].plot(data1[nn][tt][uu][ss][ww][vv][lll_load][0,:st1_stop]+EOT_diff,(data1[nn][tt][uu][ss][ww][vv][lll_load][1,:st1_stop]+data1[nn][tt][uu][ss][ww][vv][lll_load][2,:st1_stop]) * total_cell_num,'--',color=COL1.get_rgb(nn),label='total '+s_lgd_1+s_sig+'_'+str(lll_load))
+                                axCellNo[1,0].plot(data1[nn][tt][uu][ss][ww][vv][lll_load][0,:st1_stop:step]+EOT_diff,(data1[nn][tt][uu][ss][ww][vv][lll_load][1,:st1_stop:step]+data1[nn][tt][uu][ss][ww][vv][lll_load][2,:st1_stop:step]) * total_cell_num,'--',color=COL1.get_rgb(nn),label='total '+s_lgd_1+s_sig+'_'+str(lll_load))
+                        st0_stop = np.flatnonzero(dataN[nn][tt][uu][ss][ww][vv][lll_load][0] < T_stop).max();
+                        axCellNo[1,0].plot(dataN[nn][tt][uu][ss][ww][vv][lll_load][0,:st0_stop:step],(dataN[nn][tt][uu][ss][ww][vv][lll_load][1,:st0_stop:step]+dataN[nn][tt][uu][ss][ww][vv][lll_load][2,:st0_stop:step]) * total_cell_num,color[2]+'--',label='total, no treatment_'+str(lll_load))
         axCellNo[1,0].legend(fancybox=True, framealpha=0.5);
     # TODO: maybe add the other ones too?
-        axCellNo11 = figCellNo.add_axes([x2, y2, width, height]);
         #figC, axC = plt.subplots(figsize=(8,8));
         for nn,eln in enumerate(Nsched_vec):
             # s_lgd_0 = "Schedule "+str(eln)+Nsched_vec_str[nn]+';'+str((Doses[nn],Fracs[nn]));
@@ -374,29 +383,33 @@ if use_muQ:
                             st2_stop = np.flatnonzero(data2[nn][tt][uu][ss][ww][vv][lll_load][0] < T_stop).max();
                             
                             
-                            # if log_yscaleQ:
-                            #     axCellNo[1,1].set_yscale('log')
-                            axCellNo[1,1].plot(data2[nn][tt][uu][ss][ww][vv][lll_load][0,:st2_stop],csc_p[0][:st2_stop],'-',color=COL2.get_rgb(nn),label='CSC frac'+s_lgd_0+s_sig+'_'+str(lll_load))
+                            if log_yscaleQ:
+                                axCellNo[1,1].set_yscale('log')
+                            if showReprogQ:
+                                axCellNo[1,1].plot(data2[nn][tt][uu][ss][ww][vv][lll_load][0,:st2_stop:step],csc_p[0][:st2_stop:step],'-',color=COL2.get_rgb(nn),label='CSC frac'+s_lgd_0+s_sig+'_'+str(lll_load))
                             
                             csc_p_inset = [];
                             csc_p_inset += [data2[nn][tt][uu][ss][ww][vv][lll_load][1]/(data2[nn][tt][uu][ss][ww][vv][lll_load][1] + data2[nn][tt][uu][ss][ww][vv][lll_load][2])];
                             csc_p_inset += [data1[nn][tt][uu][ss][ww][vv][lll_load][1]/(data1[nn][tt][uu][ss][ww][vv][lll_load][1] + data1[nn][tt][uu][ss][ww][vv][lll_load][2])];
                             
                             st2_stop = np.flatnonzero(data2[nn][tt][uu][ss][ww][vv][lll_load][0] < T_stop_inset).max();
-                            axCellNo11.plot(data2[nn][tt][uu][ss][ww][vv][lll_load][0,:st2_stop],csc_p_inset[0][:st2_stop],'--',color=COL2.get_rgb(nn),label='DCC '+s_lgd_0+'_'+str(lll_load))
+                            
+                            if use_insetsQ:
+                                axCellNo11 = figCellNo.add_axes([x2, y2, width, height]);
+                                axCellNo11.plot(data2[nn][tt][uu][ss][ww][vv][lll_load][0,:st2_stop:step],csc_p_inset[0][:st2_stop:step],'--',color=COL2.get_rgb(nn),label='DCC '+s_lgd_0+'_'+str(lll_load))
 
                             if showNonReprogQ:
                                 st1_stop = np.flatnonzero(data1[nn][tt][uu][ss][ww][vv][lll_load][0] < T_stop).max();
-                                axCellNo[1,1].plot(data1[nn][tt][uu][ss][ww][vv][lll_load][0,:st1_stop]+EOT_diff,csc_p[1][:st1_stop],'-',color=COL1.get_rgb(nn),label='CSC frac'+s_lgd_1+s_sig+'_'+str(lll_load))
+                                axCellNo[1,1].plot(data1[nn][tt][uu][ss][ww][vv][lll_load][0,:st1_stop:step]+EOT_diff,csc_p[1][:st1_stop:step],'-',color=COL1.get_rgb(nn),label='CSC frac'+s_lgd_1+s_sig+'_'+str(lll_load))
                                 if use_insetsQ:
                                     st1_stop = np.flatnonzero(data1[nn][tt][uu][ss][ww][vv][lll_load][0] < T_stop_inset).max();
-                                    axCellNo11.plot(data1[nn][tt][uu][ss][ww][vv][lll_load][0,:st1_stop]+EOT_diff,csc_p[1][:st1_stop],'-',color=COL1.get_rgb(nn),label='CSC frac'+s_lgd_1+s_sig+'_'+str(lll_load))
+                                    axCellNo11.plot(data1[nn][tt][uu][ss][ww][vv][lll_load][0,:st1_stop:step]+EOT_diff,csc_p[1][:st1_stop:step],'-',color=COL1.get_rgb(nn),label='CSC frac'+s_lgd_1+s_sig+'_'+str(lll_load))
                             
             # replace(base_dirGD+"csc"+plot_save_suffix+".png",plot_drty+"csc"+plot_save_suffix+".png")
         csc_p += [dataN[nn][tt][uu][ss][ww][vv][lll_load][1]/(dataN[nn][tt][uu][ss][ww][vv][lll_load][1] + dataN[nn][tt][uu][ss][ww][vv][lll_load][2])];
         csc_p_inset += [dataN[nn][tt][uu][ss][ww][vv][lll_load][1]/(dataN[nn][tt][uu][ss][ww][vv][lll_load][1] + dataN[nn][tt][uu][ss][ww][vv][lll_load][2])];
         st0_stop = np.flatnonzero(dataN[nn][tt][uu][ss][ww][vv][lll_load][0] < T_stop).max();
-        axCellNo[1,1].plot(dataN[nn][tt][uu][ss][ww][vv][lll_load][0,:st0_stop],csc_p[2][:st0_stop],color[2]+'-',label='CSC frac, no treatment')
+        axCellNo[1,1].plot(dataN[nn][tt][uu][ss][ww][vv][lll_load][0,:st0_stop:step],csc_p[2][:st0_stop:step],color[2]+'-',label='CSC frac, no treatment')
         axCellNo[1,1].legend(fancybox=True, framealpha=0.5);
         axCellNo[1,1].set_ylabel("CSC frac")#,fontsize=2*ticksize)
         axCellNo[1,1].set_xlabel("time (days)")#),fontsize=2*ticksize)
@@ -404,7 +417,7 @@ if use_muQ:
         #axCellNo[1,1].tick_params(axis='both', which='major',labelsize=1.5*ticksize)
         if use_insetsQ:
             st0_stop = np.flatnonzero(dataN[nn][tt][uu][ss][ww][vv][lll_load][0] < T_stop_inset).max()+1;
-            axCellNo11.plot(dataN[nn][tt][uu][ss][ww][vv][lll_load][0,:st0_stop],csc_p_inset[2][:st0_stop],color[2]+'-',label='CSC frac, no treatment')
+            axCellNo11.plot(dataN[nn][tt][uu][ss][ww][vv][lll_load][0,:st0_stop:step],csc_p_inset[2][:st0_stop:step],color[2]+'-',label='CSC frac, no treatment')
             axCellNo11.tick_params(axis='both', which='major',labelsize=ticksize)
         figCellNo
         # if saveQ:
@@ -432,13 +445,14 @@ if use_muQ:
                             
                             # if log_yscaleQ:
                             #     axRest[0,0].set_yscale('log')
-                            axRest[0,0].plot(data2[nn][tt][uu][ss][ww][vv][lll_load][0,:st2_stop],data2[nn][tt][uu][ss][ww][vv][lll_load][3,:st2_stop],'--',color=COL2.get_rgb(nn),label='mu frac'+s_lgd_0+s_sig+'_'+str(lll_load))
+                            if showReprogQ:                            
+                                axRest[0,0].plot(data2[nn][tt][uu][ss][ww][vv][lll_load][0,:st2_stop:step],data2[nn][tt][uu][ss][ww][vv][lll_load][3,:st2_stop:step],'--',color=COL2.get_rgb(nn),label='mu frac'+s_lgd_0+s_sig+'_'+str(lll_load))
                             if showNonReprogQ:
                                 st1_stop = np.flatnonzero(data1[nn][tt][uu][ss][ww][vv][lll_load][0] < T_stop).max();
-                                axRest[0,0].plot(data1[nn][tt][uu][ss][ww][vv][lll_load][0,:st1_stop]+EOT_diff,data1[nn][tt][uu][ss][ww][vv][lll_load][3,:st1_stop],'--',color=COL1.get_rgb(nn),label='mu frac'+s_lgd_1+s_sig+'_'+str(lll_load))
+                                axRest[0,0].plot(data1[nn][tt][uu][ss][ww][vv][lll_load][0,:st1_stop:step]+EOT_diff,data1[nn][tt][uu][ss][ww][vv][lll_load][3,:st1_stop:step],'--',color=COL1.get_rgb(nn),label='mu frac'+s_lgd_1+s_sig+'_'+str(lll_load))
 
         st0_stop = np.flatnonzero(dataN[nn][tt][uu][ss][ww][vv][lll_load][0] < T_stop).max();
-        axRest[0,0].plot(dataN[nn][tt][uu][ss][ww][vv][lll_load][0,:st0_stop],dataN[nn][tt][uu][ss][ww][vv][lll_load][3,:st0_stop],'g--',label='mu frac, no treatment_'+str(lll_load))
+        axRest[0,0].plot(dataN[nn][tt][uu][ss][ww][vv][lll_load][0,:st0_stop:step],dataN[nn][tt][uu][ss][ww][vv][lll_load][3,:st0_stop:step],'g--',label='mu frac, no treatment_'+str(lll_load))
         axRest[0,0].legend(fancybox=True, framealpha=0.5);
                 
         axRest[0,0].set_ylabel("mu frac"+log_str)
@@ -446,7 +460,7 @@ if use_muQ:
         #axRest[0,0].set_title(s_title)
         if showNonReprogQ:
             st1_stop = np.flatnonzero(data1[nn][tt][uu][ss][ww][vv][lll_load][0] < T_stop).max();
-            axRest[0,0].plot(data1[nn][tt][uu][ss][ww][vv][lll_load][0,:st1_stop]+EOT_diff,data1[nn][tt][uu][ss][ww][vv][lll_load][3,:st1_stop],'--',color=COL1.get_rgb(nn),label='mu frac'+s_lgd_1+s_sig+'_'+str(lll_load))
+            axRest[0,0].plot(data1[nn][tt][uu][ss][ww][vv][lll_load][0,:st1_stop:step]+EOT_diff,data1[nn][tt][uu][ss][ww][vv][lll_load][3,:st1_stop:step],'--',color=COL1.get_rgb(nn),label='mu frac'+s_lgd_1+s_sig+'_'+str(lll_load))
         
             # if saveQ:
             #     figTs.savefig(plot_drty+"pop"+plot_save_suffix+".png",dpi=300)
@@ -466,16 +480,17 @@ if use_muQ:
                             s_sig = '(σ='+ str(el) +')';
                             
                             st2_stop = np.flatnonzero(data2[nn][tt][uu][ss][ww][vv][lll_load][0] < T_stop).max();
-                            axRest[0,1].plot(data2[nn][tt][uu][ss][ww][vv][lll_load][0,:st2_stop],beta * data2[nn][tt][uu][ss][ww][vv][lll_load][3,:st2_stop] * data2[nn][tt][uu][ss][ww][vv][lll_load][2,:st2_stop] * total_cell_num,'--',color=COL2.get_rgb(nn),label='mu rate'+s_lgd_0+s_sig+'_'+str(lll_load))
+                            if showReprogQ:                            
+                                axRest[0,1].plot(data2[nn][tt][uu][ss][ww][vv][lll_load][0,:st2_stop:step],beta * data2[nn][tt][uu][ss][ww][vv][lll_load][3,:st2_stop:step] * data2[nn][tt][uu][ss][ww][vv][lll_load][2,:st2_stop:step] * total_cell_num,'--',color=COL2.get_rgb(nn),label='mu rate'+s_lgd_0+s_sig+'_'+str(lll_load))
                             axRest[0,1].set_ylabel("mu rate"+log_str)
                             axRest[0,1].set_xlabel("time (days)")
                             #axRest[0,1].set_title(s_title)
                             if showNonReprogQ:
                                 st1_stop = np.flatnonzero(data1[nn][tt][uu][ss][ww][vv][lll_load][0] < T_stop).max();
-                                axRest[0,1].plot(data1[nn][tt][uu][ss][ww][vv][lll_load][0,:st1_stop]+EOT_diff,beta * data1[nn][tt][uu][ss][ww][vv][lll_load][3,:st1_stop] * data1[nn][tt][uu][ss][ww][vv][lll_load][2,:st1_stop] * total_cell_num,'--',color=COL1.get_rgb(nn),label='mu rate'+s_lgd_1+s_sig+'_'+str(lll_load))
+                                axRest[0,1].plot(data1[nn][tt][uu][ss][ww][vv][lll_load][0,:st1_stop:step]+EOT_diff,beta * data1[nn][tt][uu][ss][ww][vv][lll_load][3,:st1_stop:step] * data1[nn][tt][uu][ss][ww][vv][lll_load][2,:st1_stop:step] * total_cell_num,'--',color=COL1.get_rgb(nn),label='mu rate'+s_lgd_1+s_sig+'_'+str(lll_load))
         
         st0_stop = np.flatnonzero(dataN[nn][tt][uu][ss][ww][vv][lll_load][0] < T_stop).max();
-        axRest[0,1].plot(dataN[nn][tt][uu][ss][ww][vv][lll_load][0,:st0_stop],beta * dataN[nn][tt][uu][ss][ww][vv][lll_load][3,:st0_stop] * dataN[nn][tt][uu][ss][ww][vv][lll_load][2,:st0_stop] * total_cell_num,'g--',label='mu rate, no treatment_'+str(lll_load))
+        axRest[0,1].plot(dataN[nn][tt][uu][ss][ww][vv][lll_load][0,:st0_stop:step],beta * dataN[nn][tt][uu][ss][ww][vv][lll_load][3,:st0_stop:step] * dataN[nn][tt][uu][ss][ww][vv][lll_load][2,:st0_stop:step] * total_cell_num,'g--',label='mu rate, no treatment_'+str(lll_load))
         axRest[0,1].legend(fancybox=True, framealpha=0.5);
         # if saveQ:
         #     figTsr.savefig(plot_drty+"pop"+plot_save_suffix+".png",dpi=300)
@@ -497,16 +512,17 @@ if use_muQ:
                             s_sig = '(σ='+ str(el) +')';
                             
                             st2_stop = np.flatnonzero(data2[nn][tt][uu][ss][ww][vv][lll_load][0] < T_stop).max();
-                            axRest[1,0].plot(data2[nn][tt][uu][ss][ww][vv][lll_load][0,:st2_stop],xi3* data2[nn][tt][uu][ss][ww][vv][lll_load][1,:st2_stop]/(1+xi3* data2[nn][tt][uu][ss][ww][vv][lll_load][1,:st2_stop]),'--',color=COL2.get_rgb(nn),label='feedforward rate coefficient'+s_lgd_0+s_sig+'_'+str(lll_load))
+                            if showReprogQ:                            
+                                axRest[1,0].plot(data2[nn][tt][uu][ss][ww][vv][lll_load][0,:st2_stop:step],xi3* data2[nn][tt][uu][ss][ww][vv][lll_load][1,:st2_stop:step]/(1+xi3* data2[nn][tt][uu][ss][ww][vv][lll_load][1,:st2_stop:step]),'--',color=COL2.get_rgb(nn),label='feedforward rate coefficient'+s_lgd_0+s_sig+'_'+str(lll_load))
                             axRest[1,0].set_ylabel("feedforward rate coefficient"+log_str)
                             axRest[1,0].set_xlabel("time (days)")
                             #axRest[1,0].set_title(s_title)
                             if showNonReprogQ:
                                 st1_stop = np.flatnonzero(data1[nn][tt][uu][ss][ww][vv][lll_load][0] < T_stop).max();
-                                axRest[1,0].plot(data1[nn][tt][uu][ss][ww][vv][lll_load][0,:st1_stop]+EOT_diff,xi3 * data1[nn][tt][uu][ss][ww][vv][lll_load][1,:st1_stop]/(1+ xi3*data1[nn][tt][uu][ss][ww][vv][lll_load][1,:st1_stop]),'--',color=COL1.get_rgb(nn),label='feedforward rate coefficient'+s_lgd_1+s_sig+'_'+str(lll_load))
+                                axRest[1,0].plot(data1[nn][tt][uu][ss][ww][vv][lll_load][0,:st1_stop:step]+EOT_diff,xi3 * data1[nn][tt][uu][ss][ww][vv][lll_load][1,:st1_stop:step]/(1+ xi3*data1[nn][tt][uu][ss][ww][vv][lll_load][1,:st1_stop:step]),'--',color=COL1.get_rgb(nn),label='feedforward rate coefficient'+s_lgd_1+s_sig+'_'+str(lll_load))
         
         st0_stop = np.flatnonzero(dataN[nn][tt][uu][ss][ww][vv][lll_load][0] < T_stop).max();
-        axRest[1,0].plot(dataN[nn][tt][uu][ss][ww][vv][lll_load][0,:st0_stop],xi3 * dataN[nn][tt][uu][ss][ww][vv][lll_load][1,:st0_stop]/(1+xi3*dataN[nn][tt][uu][ss][ww][vv][lll_load][1,:st0_stop]),'g--',label='feedforward rate coefficient, no treatment_'+str(lll_load))
+        axRest[1,0].plot(dataN[nn][tt][uu][ss][ww][vv][lll_load][0,:st0_stop:step],xi3 * dataN[nn][tt][uu][ss][ww][vv][lll_load][1,:st0_stop:step]/(1+xi3*dataN[nn][tt][uu][ss][ww][vv][lll_load][1,:st0_stop:step]),'g--',label='feedforward rate coefficient, no treatment_'+str(lll_load))
         axRest[1,0].legend(fancybox=True, framealpha=0.5);
 
         #figTsrVd, axTsrVd = plt.subplots(figsize=(8,8));
@@ -526,52 +542,57 @@ if use_muQ:
                             
                             st2_stop = np.flatnonzero(data2[nn][tt][uu][ss][ww][vv][lll_load][0] < T_stop).max();
                             #
-                            axRest[1,1].plot(data2[nn][tt][uu][ss][ww][vv][lll_load][0,:st2_stop],r2/(1+h2*data2[nn][tt][uu][ss][ww][vv][lll_load][2,:st2_stop]) * xi3*data2[nn][tt][uu][ss][ww][vv][lll_load][1,:st2_stop]/(1+xi3*data2[nn][tt][uu][ss][ww][vv][lll_load][1,:st2_stop]) - d-(death_r2_mult*r2-d)*hd*data2[nn][tt][uu][ss][ww][vv][lll_load][2,:st2_stop]/(1+hd*data2[nn][tt][uu][ss][ww][vv][lll_load][2,:st2_stop]),'--',color=COL2.get_rgb(nn),label='effective division rate coefficient'+s_lgd_0+s_sig+'_'+str(lll_load))
+                            if showReprogQ:
+                                axRest[1,1].plot(data2[nn][tt][uu][ss][ww][vv][lll_load][0,:st2_stop:step],r2/(1+h2*data2[nn][tt][uu][ss][ww][vv][lll_load][2,:st2_stop:step]) * xi3*data2[nn][tt][uu][ss][ww][vv][lll_load][1,:st2_stop:step]/(1+xi3*data2[nn][tt][uu][ss][ww][vv][lll_load][1,:st2_stop:step]) - d-(death_r2_mult*r2-d)*hd*data2[nn][tt][uu][ss][ww][vv][lll_load][2,:st2_stop:step]/(1+hd*data2[nn][tt][uu][ss][ww][vv][lll_load][2,:st2_stop:step]),'--',color=COL2.get_rgb(nn),label='effective division rate coefficient'+s_lgd_0+s_sig+'_'+str(lll_load))
                             axRest[1,1].set_ylabel("effective division rate coefficient"+log_str)
                             axRest[1,1].set_xlabel("time (days)")
                             #axRest[1,1].set_title(s_title)
                             if showNonReprogQ:
                                 st1_stop = np.flatnonzero(data1[nn][tt][uu][ss][ww][vv][lll_load][0] < T_stop).max();
-                                axRest[1,1].plot(data1[nn][tt][uu][ss][ww][vv][lll_load][0,:st1_stop]+EOT_diff,r2/(1+h2*data1[nn][tt][uu][ss][ww][vv][lll_load][2,:st1_stop]) * xi3*data1[nn][tt][uu][ss][ww][vv][lll_load][1,:st1_stop]/(1+xi3*data1[nn][tt][uu][ss][ww][vv][lll_load][1,:st1_stop]) - d-(death_r2_mult*r2-d)*hd*data1[nn][tt][uu][ss][ww][vv][lll_load][2,:st1_stop]/(1+hd*data1[nn][tt][uu][ss][ww][vv][lll_load][2,:st1_stop]),'--',color=COL1.get_rgb(nn),label='effective division rate coefficient'+s_lgd_1+s_sig+'_'+str(lll_load))
+                                axRest[1,1].plot(data1[nn][tt][uu][ss][ww][vv][lll_load][0,:st1_stop:step]+EOT_diff,r2/(1+h2*data1[nn][tt][uu][ss][ww][vv][lll_load][2,:st1_stop:step]) * xi3*data1[nn][tt][uu][ss][ww][vv][lll_load][1,:st1_stop:step]/(1+xi3*data1[nn][tt][uu][ss][ww][vv][lll_load][1,:st1_stop:step]) - d-(death_r2_mult*r2-d)*hd*data1[nn][tt][uu][ss][ww][vv][lll_load][2,:st1_stop:step]/(1+hd*data1[nn][tt][uu][ss][ww][vv][lll_load][2,:st1_stop:step]),'--',color=COL1.get_rgb(nn),label='effective division rate coefficient'+s_lgd_1+s_sig+'_'+str(lll_load))
         
         st0_stop = np.flatnonzero(dataN[nn][tt][uu][ss][ww][vv][lll_load][0] < T_stop).max();
-        axRest[1,1].plot(dataN[nn][tt][uu][ss][ww][vv][lll_load][0,:st0_stop],r2/(1+h2*dataN[nn][tt][uu][ss][ww][vv][lll_load][2,:st0_stop]) * xi3*dataN[nn][tt][uu][ss][ww][vv][lll_load][1,:st0_stop]/(1+xi3*dataN[nn][tt][uu][ss][ww][vv][lll_load][1,:st0_stop]) - d-(death_r2_mult*r2-d)*hd*dataN[nn][tt][uu][ss][ww][vv][lll_load][2,:st0_stop]/(1+hd*dataN[nn][tt][uu][ss][ww][vv][lll_load][2,:st0_stop]),'g--',label='effective division rate coefficient, no treatment_'+str(lll_load))
+        axRest[1,1].plot(dataN[nn][tt][uu][ss][ww][vv][lll_load][0,:st0_stop:step],r2/(1+h2*dataN[nn][tt][uu][ss][ww][vv][lll_load][2,:st0_stop:step]) * xi3*dataN[nn][tt][uu][ss][ww][vv][lll_load][1,:st0_stop:step]/(1+xi3*dataN[nn][tt][uu][ss][ww][vv][lll_load][1,:st0_stop:step]) - d-(death_r2_mult*r2-d)*hd*dataN[nn][tt][uu][ss][ww][vv][lll_load][2,:st0_stop:step]/(1+hd*dataN[nn][tt][uu][ss][ww][vv][lll_load][2,:st0_stop:step]),'g--',label='effective division rate coefficient, no treatment_'+str(lll_load))
         axRest[1,1].legend(fancybox=True, framealpha=0.5);
         if use_insetsQ:
             axRest00_inset = figRest.add_axes([x1,y1, width, height])
             st2_stop = np.flatnonzero(data2[nn][tt][uu][ss][ww][vv][lll_load][0] < T_stop_inset).max();
-            axRest00_inset.plot(data2[nn][tt][uu][ss][ww][vv][lll_load][0,:st2_stop],data2[nn][tt][uu][ss][ww][vv][lll_load][3,:st2_stop],'--',color=COL2.get_rgb(nn),label='mu frac'+s_lgd_0+s_sig+'_'+str(lll_load))
+            if showReprogQ:
+                axRest00_inset.plot(data2[nn][tt][uu][ss][ww][vv][lll_load][0,:st2_stop:step],data2[nn][tt][uu][ss][ww][vv][lll_load][3,:st2_stop:step],'--',color=COL2.get_rgb(nn),label='mu frac'+s_lgd_0+s_sig+'_'+str(lll_load))
             if showNonReprogQ:
                 st1_stop = np.flatnonzero(data1[nn][tt][uu][ss][ww][vv][lll_load][0] < T_stop_inset).max();
-                axRest00_inset.plot(data1[nn][tt][uu][ss][ww][vv][lll_load][0,:st1_stop]+EOT_diff,data1[nn][tt][uu][ss][ww][vv][lll_load][3,:st1_stop],'--',color=COL1.get_rgb(nn),label='mu frac'+s_lgd_1+s_sig+'_'+str(lll_load))
+                axRest00_inset.plot(data1[nn][tt][uu][ss][ww][vv][lll_load][0,:st1_stop:step]+EOT_diff,data1[nn][tt][uu][ss][ww][vv][lll_load][3,:st1_stop:step],'--',color=COL1.get_rgb(nn),label='mu frac'+s_lgd_1+s_sig+'_'+str(lll_load))
             st0_stop = np.flatnonzero(dataN[nn][tt][uu][ss][ww][vv][lll_load][0] < T_stop_inset).max()+1;
-            axRest00_inset.plot(dataN[nn][tt][uu][ss][ww][vv][lll_load][0,:st0_stop],dataN[nn][tt][uu][ss][ww][vv][lll_load][3,:st0_stop],'g--',label='mu frac, no treatment_'+str(lll_load))
+            axRest00_inset.plot(dataN[nn][tt][uu][ss][ww][vv][lll_load][0,:st0_stop:step],dataN[nn][tt][uu][ss][ww][vv][lll_load][3,:st0_stop:step],'g--',label='mu frac, no treatment_'+str(lll_load))
             axRest01_inset = figRest.add_axes([x2,y1, width, height])
             st2_stop = np.flatnonzero(data2[nn][tt][uu][ss][ww][vv][lll_load][0] < T_stop_inset).max();
-            axRest01_inset.plot(data2[nn][tt][uu][ss][ww][vv][lll_load][0,:st2_stop],beta * data2[nn][tt][uu][ss][ww][vv][lll_load][3,:st2_stop] * data2[nn][tt][uu][ss][ww][vv][lll_load][2,:st2_stop] * total_cell_num,'--',color=COL2.get_rgb(nn),label='mu rate'+s_lgd_0+s_sig+'_'+str(lll_load))
+            if showReprogQ:
+                axRest01_inset.plot(data2[nn][tt][uu][ss][ww][vv][lll_load][0,:st2_stop:step],beta * data2[nn][tt][uu][ss][ww][vv][lll_load][3,:st2_stop:step] * data2[nn][tt][uu][ss][ww][vv][lll_load][2,:st2_stop:step] * total_cell_num,'--',color=COL2.get_rgb(nn),label='mu rate'+s_lgd_0+s_sig+'_'+str(lll_load))
             if showNonReprogQ:
                 st1_stop = np.flatnonzero(data1[nn][tt][uu][ss][ww][vv][lll_load][0] < T_stop_inset).max();
-                axRest01_inset.plot(data1[nn][tt][uu][ss][ww][vv][lll_load][0,:st1_stop]+EOT_diff,beta * data1[nn][tt][uu][ss][ww][vv][lll_load][3,:st1_stop] * data1[nn][tt][uu][ss][ww][vv][lll_load][2,:st1_stop] * total_cell_num,'--',color=COL1.get_rgb(nn),label='mu rate'+s_lgd_1+s_sig+'_'+str(lll_load))
+                axRest01_inset.plot(data1[nn][tt][uu][ss][ww][vv][lll_load][0,:st1_stop:step]+EOT_diff,beta * data1[nn][tt][uu][ss][ww][vv][lll_load][3,:st1_stop:step] * data1[nn][tt][uu][ss][ww][vv][lll_load][2,:st1_stop:step] * total_cell_num,'--',color=COL1.get_rgb(nn),label='mu rate'+s_lgd_1+s_sig+'_'+str(lll_load))
             st0_stop = np.flatnonzero(dataN[nn][tt][uu][ss][ww][vv][lll_load][0] < T_stop_inset).max()+1;
-            axRest01_inset.plot(dataN[nn][tt][uu][ss][ww][vv][lll_load][0,:st0_stop],beta * dataN[nn][tt][uu][ss][ww][vv][lll_load][3,:st0_stop] * dataN[nn][tt][uu][ss][ww][vv][lll_load][2,:st0_stop] * total_cell_num,'g--',label='mu rate, no treatment_'+str(lll_load))
+            axRest01_inset.plot(dataN[nn][tt][uu][ss][ww][vv][lll_load][0,:st0_stop:step],beta * dataN[nn][tt][uu][ss][ww][vv][lll_load][3,:st0_stop:step] * dataN[nn][tt][uu][ss][ww][vv][lll_load][2,:st0_stop:step] * total_cell_num,'g--',label='mu rate, no treatment_'+str(lll_load))
             
             axRest10_inset = figRest.add_axes([x1,y2, width, height])
             st2_stop = np.flatnonzero(data2[nn][tt][uu][ss][ww][vv][lll_load][0] < T_stop_inset).max();
-            axRest10_inset.plot(data2[nn][tt][uu][ss][ww][vv][lll_load][0,:st2_stop],xi3* data2[nn][tt][uu][ss][ww][vv][lll_load][1,:st2_stop]/(1+xi3* data2[nn][tt][uu][ss][ww][vv][lll_load][1,:st2_stop]),'--',color=COL2.get_rgb(nn),label='feedforward rate coefficient'+s_lgd_0+s_sig+'_'+str(lll_load))
+            if showReprogQ:
+                axRest10_inset.plot(data2[nn][tt][uu][ss][ww][vv][lll_load][0,:st2_stop:step],xi3* data2[nn][tt][uu][ss][ww][vv][lll_load][1,:st2_stop:step]/(1+xi3* data2[nn][tt][uu][ss][ww][vv][lll_load][1,:st2_stop:step]),'--',color=COL2.get_rgb(nn),label='feedforward rate coefficient'+s_lgd_0+s_sig+'_'+str(lll_load))
             if showNonReprogQ:
                 st1_stop = np.flatnonzero(data1[nn][tt][uu][ss][ww][vv][lll_load][0] < T_stop_inset).max();
-                axRest10_inset.plot(data1[nn][tt][uu][ss][ww][vv][lll_load][0,:st1_stop]+EOT_diff,xi3 * data1[nn][tt][uu][ss][ww][vv][lll_load][1,:st1_stop]/(1+ xi3*data1[nn][tt][uu][ss][ww][vv][lll_load][1,:st1_stop]),'--',color=COL1.get_rgb(nn),label='feedforward rate coefficient'+s_lgd_1+s_sig+'_'+str(lll_load))
+                axRest10_inset.plot(data1[nn][tt][uu][ss][ww][vv][lll_load][0,:st1_stop:step]+EOT_diff,xi3 * data1[nn][tt][uu][ss][ww][vv][lll_load][1,:st1_stop:step]/(1+ xi3*data1[nn][tt][uu][ss][ww][vv][lll_load][1,:st1_stop:step]),'--',color=COL1.get_rgb(nn),label='feedforward rate coefficient'+s_lgd_1+s_sig+'_'+str(lll_load))
             st0_stop = np.flatnonzero(dataN[nn][tt][uu][ss][ww][vv][lll_load][0] < T_stop_inset).max()+1;
-            axRest10_inset.plot(dataN[nn][tt][uu][ss][ww][vv][lll_load][0,:st0_stop],xi3 * dataN[nn][tt][uu][ss][ww][vv][lll_load][1,:st0_stop]/(1+xi3*dataN[nn][tt][uu][ss][ww][vv][lll_load][1,:st0_stop]),'g--',label='feedforward rate coefficient, no treatment_'+str(lll_load))
+            axRest10_inset.plot(dataN[nn][tt][uu][ss][ww][vv][lll_load][0,:st0_stop:step],xi3 * dataN[nn][tt][uu][ss][ww][vv][lll_load][1,:st0_stop:step]/(1+xi3*dataN[nn][tt][uu][ss][ww][vv][lll_load][1,:st0_stop:step]),'g--',label='feedforward rate coefficient, no treatment_'+str(lll_load))
             
             axRest11_inset = figRest.add_axes([x2,y2, width, height])
             st2_stop = np.flatnonzero(data2[nn][tt][uu][ss][ww][vv][lll_load][0] < T_stop_inset).max();
-            axRest11_inset.plot(data2[nn][tt][uu][ss][ww][vv][lll_load][0,:st2_stop],r2/(1+h2*data2[nn][tt][uu][ss][ww][vv][lll_load][2,:st2_stop]) * xi3*data2[nn][tt][uu][ss][ww][vv][lll_load][1,:st2_stop]/(1+xi3*data2[nn][tt][uu][ss][ww][vv][lll_load][1,:st2_stop]) - d-(death_r2_mult*r2-d)*hd*data2[nn][tt][uu][ss][ww][vv][lll_load][2,:st2_stop]/(1+hd*data2[nn][tt][uu][ss][ww][vv][lll_load][2,:st2_stop]),'--',color=COL2.get_rgb(nn),label='effective division rate coefficient'+s_lgd_0+s_sig+'_'+str(lll_load))
+            if showReprogQ:
+                axRest11_inset.plot(data2[nn][tt][uu][ss][ww][vv][lll_load][0,:st2_stop:step],r2/(1+h2*data2[nn][tt][uu][ss][ww][vv][lll_load][2,:st2_stop:step]) * xi3*data2[nn][tt][uu][ss][ww][vv][lll_load][1,:st2_stop:step]/(1+xi3*data2[nn][tt][uu][ss][ww][vv][lll_load][1,:st2_stop:step]) - d-(death_r2_mult*r2-d)*hd*data2[nn][tt][uu][ss][ww][vv][lll_load][2,:st2_stop:step]/(1+hd*data2[nn][tt][uu][ss][ww][vv][lll_load][2,:st2_stop:step]),'--',color=COL2.get_rgb(nn),label='effective division rate coefficient'+s_lgd_0+s_sig+'_'+str(lll_load))
             if showNonReprogQ:
                 st1_stop = np.flatnonzero(data1[nn][tt][uu][ss][ww][vv][lll_load][0] < T_stop_inset).max();
-                axRest11_inset.plot(data1[nn][tt][uu][ss][ww][vv][lll_load][0,:st1_stop]+EOT_diff,r2/(1+h2*data1[nn][tt][uu][ss][ww][vv][lll_load][2,:st1_stop]) * xi3*data1[nn][tt][uu][ss][ww][vv][lll_load][1,:st1_stop]/(1+xi3*data1[nn][tt][uu][ss][ww][vv][lll_load][1,:st1_stop]) - d-(death_r2_mult*r2-d)*hd*data1[nn][tt][uu][ss][ww][vv][lll_load][2,:st1_stop]/(1+hd*data1[nn][tt][uu][ss][ww][vv][lll_load][2,:st1_stop]),'--',color=COL1.get_rgb(nn),label='effective division rate coefficient'+s_lgd_1+s_sig+'_'+str(lll_load))
+                axRest11_inset.plot(data1[nn][tt][uu][ss][ww][vv][lll_load][0,:st1_stop:step]+EOT_diff,r2/(1+h2*data1[nn][tt][uu][ss][ww][vv][lll_load][2,:st1_stop:step]) * xi3*data1[nn][tt][uu][ss][ww][vv][lll_load][1,:st1_stop:step]/(1+xi3*data1[nn][tt][uu][ss][ww][vv][lll_load][1,:st1_stop:step]) - d-(death_r2_mult*r2-d)*hd*data1[nn][tt][uu][ss][ww][vv][lll_load][2,:st1_stop:step]/(1+hd*data1[nn][tt][uu][ss][ww][vv][lll_load][2,:st1_stop:step]),'--',color=COL1.get_rgb(nn),label='effective division rate coefficient'+s_lgd_1+s_sig+'_'+str(lll_load))
             st0_stop = np.flatnonzero(dataN[nn][tt][uu][ss][ww][vv][lll_load][0] < T_stop_inset).max()+1;
-            axRest11_inset.plot(dataN[nn][tt][uu][ss][ww][vv][lll_load][0,:st0_stop],r2/(1+h2*dataN[nn][tt][uu][ss][ww][vv][lll_load][2,:st0_stop]) * xi3*dataN[nn][tt][uu][ss][ww][vv][lll_load][1,:st0_stop]/(1+xi3*dataN[nn][tt][uu][ss][ww][vv][lll_load][1,:st0_stop]) - d-(death_r2_mult*r2-d)*hd*dataN[nn][tt][uu][ss][ww][vv][lll_load][2,:st0_stop]/(1+hd*dataN[nn][tt][uu][ss][ww][vv][lll_load][2,:st0_stop]),'g--',label='effective division rate coefficient, no treatment_'+str(lll_load))
+            axRest11_inset.plot(dataN[nn][tt][uu][ss][ww][vv][lll_load][0,:st0_stop:step],r2/(1+h2*dataN[nn][tt][uu][ss][ww][vv][lll_load][2,:st0_stop:step]) * xi3*dataN[nn][tt][uu][ss][ww][vv][lll_load][1,:st0_stop:step]/(1+xi3*dataN[nn][tt][uu][ss][ww][vv][lll_load][1,:st0_stop:step]) - d-(death_r2_mult*r2-d)*hd*dataN[nn][tt][uu][ss][ww][vv][lll_load][2,:st0_stop:step]/(1+hd*dataN[nn][tt][uu][ss][ww][vv][lll_load][2,:st0_stop:step]),'g--',label='effective division rate coefficient, no treatment_'+str(lll_load))
 
         figFdbk, axFdbk = plt.subplots(ncols=2, nrows=1, figsize=(20, 10),
                                 constrained_layout=True)
@@ -581,45 +602,46 @@ if use_muQ:
                                 constrained_layout=True)
         
         st2_stop = np.flatnonzero(data2[nn][tt][uu][ss][ww][vv][lll_load][0] < T_stop).max();
-        axFdbk[0].plot(data2[nn][tt][uu][ss][ww][vv][lll_load][0,:st2_stop],r2/(1+h2*data2[nn][tt][uu][ss][ww][vv][lll_load][2,:st2_stop]) * xi3*data2[nn][tt][uu][ss][ww][vv][lll_load][1,:st2_stop]/(1+xi3*data2[nn][tt][uu][ss][ww][vv][lll_load][1,:st2_stop]),'--',color=COL2.get_rgb(nn),label='DCC division rate coefficient_'+s_lgd_0+s_sig+'_'+str(lll_load))
-        axFdbk[0].plot(data2[nn][tt][uu][ss][ww][vv][lll_load][0,:st2_stop],d+(death_r2_mult*r2-d)*hd*data2[nn][tt][uu][ss][ww][vv][lll_load][2,:st2_stop]/(1+hd*data2[nn][tt][uu][ss][ww][vv][lll_load][2,:st2_stop]),'-',color=COL2.get_rgb(nn),label='DCC death rate coefficient_'+s_lgd_0+s_sig+'_'+str(lll_load))
-        axFdbk[1].plot(data2[nn][tt][uu][ss][ww][vv][lll_load][0,:st2_stop],r1/(1+h1*data2[nn][tt][uu][ss][ww][vv][lll_load][2,:st2_stop]/(1+h1a*data2[nn][tt][uu][ss][ww][vv][lll_load][1,:st2_stop])),'-',color=COL2.get_rgb(nn),label='CSC total division rate coefficient_'+s_lgd_0+s_sig+'_'+str(lll_load))
-
-        axDftn[0].semilogy(data2[nn][tt][uu][ss][ww][vv][lll_load][0,:st2_stop],(2*p/(1+l*data2[nn][tt][uu][ss][ww][vv][lll_load][2,:st2_stop])-1)*(r1/(1+h1*data2[nn][tt][uu][ss][ww][vv][lll_load][2,:st2_stop]/(1+h1a*data2[nn][tt][uu][ss][ww][vv][lll_load][1,:st2_stop])))*data2[nn][tt][uu][ss][ww][vv][lll_load][1,:st2_stop]* total_cell_num,'--',color=COL2.get_rgb(nn),label='CSC self-renewal rate_'+s_lgd_0+s_sig+'_'+str(lll_load))
-        axDftn[1].semilogy(data2[nn][tt][uu][ss][ww][vv][lll_load][0,:st2_stop],2*(1-p/(1+l*data2[nn][tt][uu][ss][ww][vv][lll_load][2,:st2_stop]))*(r1/(1+h1*data2[nn][tt][uu][ss][ww][vv][lll_load][2,:st2_stop]/(1+h1a*data2[nn][tt][uu][ss][ww][vv][lll_load][1,:st2_stop])))*data2[nn][tt][uu][ss][ww][vv][lll_load][1,:st2_stop]* total_cell_num,'-',color=COL2.get_rgb(nn),label='CSC differentiation rate_'+s_lgd_0+s_sig+'_'+str(lll_load))
+        if showReprogQ:
+            axFdbk[0].plot(data2[nn][tt][uu][ss][ww][vv][lll_load][0,:st2_stop:step],r2/(1+h2*data2[nn][tt][uu][ss][ww][vv][lll_load][2,:st2_stop:step]) * xi3*data2[nn][tt][uu][ss][ww][vv][lll_load][1,:st2_stop:step]/(1+xi3*data2[nn][tt][uu][ss][ww][vv][lll_load][1,:st2_stop:step]),'--',color=COL2.get_rgb(nn),label='DCC division rate coefficient_'+s_lgd_0+s_sig+'_'+str(lll_load))
+            axFdbk[0].plot(data2[nn][tt][uu][ss][ww][vv][lll_load][0,:st2_stop:step],d+(death_r2_mult*r2-d)*hd*data2[nn][tt][uu][ss][ww][vv][lll_load][2,:st2_stop:step]/(1+hd*data2[nn][tt][uu][ss][ww][vv][lll_load][2,:st2_stop:step]),'-',color=COL2.get_rgb(nn),label='DCC death rate coefficient_'+s_lgd_0+s_sig+'_'+str(lll_load))
+            axFdbk[1].plot(data2[nn][tt][uu][ss][ww][vv][lll_load][0,:st2_stop:step],r1/(1+h1*data2[nn][tt][uu][ss][ww][vv][lll_load][2,:st2_stop:step]/(1+h1a*data2[nn][tt][uu][ss][ww][vv][lll_load][1,:st2_stop:step])),'-',color=COL2.get_rgb(nn),label='CSC total division rate coefficient_'+s_lgd_0+s_sig+'_'+str(lll_load))
+    
+            axDftn[0].semilogy(data2[nn][tt][uu][ss][ww][vv][lll_load][0,:st2_stop:step],(2*p/(1+l*data2[nn][tt][uu][ss][ww][vv][lll_load][2,:st2_stop:step])-1)*(r1/(1+h1*data2[nn][tt][uu][ss][ww][vv][lll_load][2,:st2_stop:step]/(1+h1a*data2[nn][tt][uu][ss][ww][vv][lll_load][1,:st2_stop:step])) - dsc)*data2[nn][tt][uu][ss][ww][vv][lll_load][1,:st2_stop:step]* total_cell_num,'--',color=COL2.get_rgb(nn),label='CSC self-renewal rate_'+s_lgd_0+s_sig+'_'+str(lll_load))
+            axDftn[1].semilogy(data2[nn][tt][uu][ss][ww][vv][lll_load][0,:st2_stop:step],2*(1-p/(1+l*data2[nn][tt][uu][ss][ww][vv][lll_load][2,:st2_stop:step]))*(r1/(1+h1*data2[nn][tt][uu][ss][ww][vv][lll_load][2,:st2_stop:step]/(1+h1a*data2[nn][tt][uu][ss][ww][vv][lll_load][1,:st2_stop:step])) - dsc)*data2[nn][tt][uu][ss][ww][vv][lll_load][1,:st2_stop:step]* total_cell_num,'-',color=COL2.get_rgb(nn),label='CSC differentiation rate_'+s_lgd_0+s_sig+'_'+str(lll_load))
         
-        axNetDiv.semilogy(
-            data2[nn][tt][uu][ss][ww][vv][lll_load][0,:st2_stop],(2*(1-p/(1+l*data2[nn][tt][uu][ss][ww][vv][lll_load][2,:st2_stop]))*(r1/(1+h1*data2[nn][tt][uu][ss][ww][vv][lll_load][2,:st2_stop]/(1+h1a*data2[nn][tt][uu][ss][ww][vv][lll_load][1,:st2_stop])))*data2[nn][tt][uu][ss][ww][vv][lll_load][1,:st2_stop] + 
-                              (r2/(1+h2*data2[nn][tt][uu][ss][ww][vv][lll_load][2,:st2_stop]) * xi3*data2[nn][tt][uu][ss][ww][vv][lll_load][1,:st2_stop]/(1+xi3*data2[nn][tt][uu][ss][ww][vv][lll_load][1,:st2_stop]) - 
-                               d-(death_r2_mult*r2-d)*hd*data2[nn][tt][uu][ss][ww][vv][lll_load][2,:st2_stop]/(1+hd*data2[nn][tt][uu][ss][ww][vv][lll_load][2,:st2_stop])) * data2[nn][tt][uu][ss][ww][vv][lll_load][2,:st2_stop])* total_cell_num,'-',color=COL2.get_rgb(nn),label='DCC overall division_'+s_lgd_0+s_sig+'_'+str(lll_load))
-                                                                            
-        st1_stop = np.flatnonzero(data1[nn][tt][uu][ss][ww][vv][lll_load][0] < T_stop).max();
-        axFdbk[0].plot(data1[nn][tt][uu][ss][ww][vv][lll_load][0,:st1_stop],r2/(1+h2*data1[nn][tt][uu][ss][ww][vv][lll_load][2,:st1_stop]),'--',color=COL1.get_rgb(nn),label='DCC division rate coefficient_'+s_lgd_1+s_sig+'_'+str(lll_load))
-        axFdbk[0].plot(data1[nn][tt][uu][ss][ww][vv][lll_load][0,:st1_stop],d+(death_r2_mult*r2-d)*hd*data1[nn][tt][uu][ss][ww][vv][lll_load][2,:st1_stop]/(1+hd*data1[nn][tt][uu][ss][ww][vv][lll_load][2,:st1_stop]),'-',color=COL1.get_rgb(nn),label='DCC death rate coefficient_'+s_lgd_1+s_sig+'_'+str(lll_load))
-        axFdbk[1].plot(data1[nn][tt][uu][ss][ww][vv][lll_load][0,:st1_stop],r1/(1+h1*data1[nn][tt][uu][ss][ww][vv][lll_load][2,:st1_stop]/(1+h1a*data1[nn][tt][uu][ss][ww][vv][lll_load][1,:st1_stop])),'-',color=COL1.get_rgb(nn),label='CSC total division rate coefficient_'+s_lgd_1+s_sig+'_'+str(lll_load))
-
-        axDftn[0].semilogy(data1[nn][tt][uu][ss][ww][vv][lll_load][0,:st1_stop],(2*p/(1+l*data1[nn][tt][uu][ss][ww][vv][lll_load][2,:st1_stop])-1)*(r1/(1+h1*data1[nn][tt][uu][ss][ww][vv][lll_load][2,:st1_stop]/(1+h1a*data1[nn][tt][uu][ss][ww][vv][lll_load][1,:st1_stop])))*data1[nn][tt][uu][ss][ww][vv][lll_load][1,:st1_stop]* total_cell_num,'--',color=COL1.get_rgb(nn),label='CSC self-renewal rate_'+s_lgd_1+s_sig+'_'+str(lll_load))
-        axDftn[1].semilogy(data1[nn][tt][uu][ss][ww][vv][lll_load][0,:st1_stop],2*(1-p/(1+l*data1[nn][tt][uu][ss][ww][vv][lll_load][2,:st1_stop]))*(r1/(1+h1*data1[nn][tt][uu][ss][ww][vv][lll_load][2,:st1_stop]/(1+h1a*data1[nn][tt][uu][ss][ww][vv][lll_load][1,:st1_stop])))*data1[nn][tt][uu][ss][ww][vv][lll_load][1,:st1_stop]* total_cell_num,'-',color=COL1.get_rgb(nn),label='CSC differentiation rate_'+s_lgd_1+s_sig+'_'+str(lll_load))
-
-        axNetDiv.semilogy(
-            data1[nn][tt][uu][ss][ww][vv][lll_load][0,:st1_stop],(2*(1-p/(1+l*data1[nn][tt][uu][ss][ww][vv][lll_load][2,:st1_stop]))*(r1/(1+h1*data1[nn][tt][uu][ss][ww][vv][lll_load][2,:st1_stop]/(1+h1a*data1[nn][tt][uu][ss][ww][vv][lll_load][1,:st1_stop])))*data1[nn][tt][uu][ss][ww][vv][lll_load][1,:st1_stop] + 
-                              (r2/(1+h2*data1[nn][tt][uu][ss][ww][vv][lll_load][2,:st1_stop]) * xi3*data1[nn][tt][uu][ss][ww][vv][lll_load][1,:st1_stop]/(1+xi3*data1[nn][tt][uu][ss][ww][vv][lll_load][1,:st1_stop]) - 
-                               d-(death_r2_mult*r2-d)*hd*data1[nn][tt][uu][ss][ww][vv][lll_load][2,:st1_stop]/(1+hd*data1[nn][tt][uu][ss][ww][vv][lll_load][2,:st1_stop])) * data1[nn][tt][uu][ss][ww][vv][lll_load][2,:st1_stop]
-                              )* total_cell_num,'-',color=COL1.get_rgb(nn),label='DCC overall division_'+s_lgd_1+s_sig+'_'+str(lll_load))
-
+            axNetDiv.semilogy(
+                data2[nn][tt][uu][ss][ww][vv][lll_load][0,:st2_stop:step],(2*(1-p/(1+l*data2[nn][tt][uu][ss][ww][vv][lll_load][2,:st2_stop:step]))*(r1/(1+h1*data2[nn][tt][uu][ss][ww][vv][lll_load][2,:st2_stop:step]/(1+h1a*data2[nn][tt][uu][ss][ww][vv][lll_load][1,:st2_stop:step])))*data2[nn][tt][uu][ss][ww][vv][lll_load][1,:st2_stop:step] + 
+                                  (r2/(1+h2*data2[nn][tt][uu][ss][ww][vv][lll_load][2,:st2_stop:step]) * xi3*data2[nn][tt][uu][ss][ww][vv][lll_load][1,:st2_stop:step]/(1+xi3*data2[nn][tt][uu][ss][ww][vv][lll_load][1,:st2_stop:step]) - 
+                                   d-(death_r2_mult*r2-d)*hd*data2[nn][tt][uu][ss][ww][vv][lll_load][2,:st2_stop:step]/(1+hd*data2[nn][tt][uu][ss][ww][vv][lll_load][2,:st2_stop:step])) * data2[nn][tt][uu][ss][ww][vv][lll_load][2,:st2_stop:step])* total_cell_num,'-',color=COL2.get_rgb(nn),label='DCC overall division_'+s_lgd_0+s_sig+'_'+str(lll_load))
+        if showNonReprogQ:                                                                                
+            st1_stop = np.flatnonzero(data1[nn][tt][uu][ss][ww][vv][lll_load][0] < T_stop).max();
+            axFdbk[0].plot(data1[nn][tt][uu][ss][ww][vv][lll_load][0,:st1_stop:step],r2/(1+h2*data1[nn][tt][uu][ss][ww][vv][lll_load][2,:st1_stop:step]),'--',color=COL1.get_rgb(nn),label='DCC division rate coefficient_'+s_lgd_1+s_sig+'_'+str(lll_load))
+            axFdbk[0].plot(data1[nn][tt][uu][ss][ww][vv][lll_load][0,:st1_stop:step],d+(death_r2_mult*r2-d)*hd*data1[nn][tt][uu][ss][ww][vv][lll_load][2,:st1_stop:step]/(1+hd*data1[nn][tt][uu][ss][ww][vv][lll_load][2,:st1_stop:step]),'-',color=COL1.get_rgb(nn),label='DCC death rate coefficient_'+s_lgd_1+s_sig+'_'+str(lll_load))
+            axFdbk[1].plot(data1[nn][tt][uu][ss][ww][vv][lll_load][0,:st1_stop:step],r1/(1+h1*data1[nn][tt][uu][ss][ww][vv][lll_load][2,:st1_stop:step]/(1+h1a*data1[nn][tt][uu][ss][ww][vv][lll_load][1,:st1_stop:step])),'-',color=COL1.get_rgb(nn),label='CSC total division rate coefficient_'+s_lgd_1+s_sig+'_'+str(lll_load))
+    
+            axDftn[0].semilogy(data1[nn][tt][uu][ss][ww][vv][lll_load][0,:st1_stop:step],(2*p/(1+l*data1[nn][tt][uu][ss][ww][vv][lll_load][2,:st1_stop:step])-1)*(r1/(1+h1*data1[nn][tt][uu][ss][ww][vv][lll_load][2,:st1_stop:step]/(1+h1a*data1[nn][tt][uu][ss][ww][vv][lll_load][1,:st1_stop:step])))*data1[nn][tt][uu][ss][ww][vv][lll_load][1,:st1_stop:step]* total_cell_num,'--',color=COL1.get_rgb(nn),label='CSC self-renewal rate_'+s_lgd_1+s_sig+'_'+str(lll_load))
+            axDftn[1].semilogy(data1[nn][tt][uu][ss][ww][vv][lll_load][0,:st1_stop:step],2*(1-p/(1+l*data1[nn][tt][uu][ss][ww][vv][lll_load][2,:st1_stop:step]))*(r1/(1+h1*data1[nn][tt][uu][ss][ww][vv][lll_load][2,:st1_stop:step]/(1+h1a*data1[nn][tt][uu][ss][ww][vv][lll_load][1,:st1_stop:step])))*data1[nn][tt][uu][ss][ww][vv][lll_load][1,:st1_stop:step]* total_cell_num,'-',color=COL1.get_rgb(nn),label='CSC differentiation rate_'+s_lgd_1+s_sig+'_'+str(lll_load))
+    
+            axNetDiv.semilogy(
+                data1[nn][tt][uu][ss][ww][vv][lll_load][0,:st1_stop:step],(2*(1-p/(1+l*data1[nn][tt][uu][ss][ww][vv][lll_load][2,:st1_stop:step]))*(r1/(1+h1*data1[nn][tt][uu][ss][ww][vv][lll_load][2,:st1_stop:step]/(1+h1a*data1[nn][tt][uu][ss][ww][vv][lll_load][1,:st1_stop:step])))*data1[nn][tt][uu][ss][ww][vv][lll_load][1,:st1_stop:step] + 
+                                  (r2/(1+h2*data1[nn][tt][uu][ss][ww][vv][lll_load][2,:st1_stop:step]) * xi3*data1[nn][tt][uu][ss][ww][vv][lll_load][1,:st1_stop:step]/(1+xi3*data1[nn][tt][uu][ss][ww][vv][lll_load][1,:st1_stop:step]) - 
+                                   d-(death_r2_mult*r2-d)*hd*data1[nn][tt][uu][ss][ww][vv][lll_load][2,:st1_stop:step]/(1+hd*data1[nn][tt][uu][ss][ww][vv][lll_load][2,:st1_stop:step])) * data1[nn][tt][uu][ss][ww][vv][lll_load][2,:st1_stop:step]
+                                  )* total_cell_num,'-',color=COL1.get_rgb(nn),label='DCC overall division_'+s_lgd_1+s_sig+'_'+str(lll_load))
+    
 
         st0_stop = np.flatnonzero(dataN[nn][tt][uu][ss][ww][vv][lll_load][0] < T_stop).max();
-        axFdbk[0].plot(dataN[nn][tt][uu][ss][ww][vv][lll_load][0,:st0_stop],r2/(1+h2*dataN[nn][tt][uu][ss][ww][vv][lll_load][2,:st0_stop]) * xi3*dataN[nn][tt][uu][ss][ww][vv][lll_load][1,:st0_stop]/(1+xi3*dataN[nn][tt][uu][ss][ww][vv][lll_load][1,:st0_stop]),'g--',label='DCC division rate coefficient, no treatment_'+str(lll_load))
-        axFdbk[0].plot(dataN[nn][tt][uu][ss][ww][vv][lll_load][0,:st0_stop],d+(death_r2_mult*r2-d)*hd*dataN[nn][tt][uu][ss][ww][vv][lll_load][2,:st0_stop]/(1+hd*dataN[nn][tt][uu][ss][ww][vv][lll_load][2,:st0_stop]),'g-',label='DCC death rate coefficient, no treatment_'+str(lll_load))
-        axFdbk[1].plot(dataN[nn][tt][uu][ss][ww][vv][lll_load][0,:st0_stop],r1/(1+h1*dataN[nn][tt][uu][ss][ww][vv][lll_load][2,:st0_stop]/(1+h1a*dataN[nn][tt][uu][ss][ww][vv][lll_load][1,:st0_stop])),'g-',label='CSC total division rate coefficient, no treatment_'+str(lll_load))
+        axFdbk[0].plot(dataN[nn][tt][uu][ss][ww][vv][lll_load][0,:st0_stop:step],r2/(1+h2*dataN[nn][tt][uu][ss][ww][vv][lll_load][2,:st0_stop:step]) * xi3*dataN[nn][tt][uu][ss][ww][vv][lll_load][1,:st0_stop:step]/(1+xi3*dataN[nn][tt][uu][ss][ww][vv][lll_load][1,:st0_stop:step]),'g--',label='DCC division rate coefficient, no treatment_'+str(lll_load))
+        axFdbk[0].plot(dataN[nn][tt][uu][ss][ww][vv][lll_load][0,:st0_stop:step],d+(death_r2_mult*r2-d)*hd*dataN[nn][tt][uu][ss][ww][vv][lll_load][2,:st0_stop:step]/(1+hd*dataN[nn][tt][uu][ss][ww][vv][lll_load][2,:st0_stop:step]),'g-',label='DCC death rate coefficient, no treatment_'+str(lll_load))
+        axFdbk[1].plot(dataN[nn][tt][uu][ss][ww][vv][lll_load][0,:st0_stop:step],r1/(1+h1*dataN[nn][tt][uu][ss][ww][vv][lll_load][2,:st0_stop:step]/(1+h1a*dataN[nn][tt][uu][ss][ww][vv][lll_load][1,:st0_stop:step])),'g-',label='CSC total division rate coefficient, no treatment_'+str(lll_load))
 
-        axDftn[0].semilogy(dataN[nn][tt][uu][ss][ww][vv][lll_load][0,:st0_stop],(2*p/(1+l*dataN[nn][tt][uu][ss][ww][vv][lll_load][2,:st0_stop])-1)*(r1/(1+h1*dataN[nn][tt][uu][ss][ww][vv][lll_load][2,:st0_stop]/(1+h1a*dataN[nn][tt][uu][ss][ww][vv][lll_load][1,:st0_stop]))) * dataN[nn][tt][uu][ss][ww][vv][lll_load][1,:st0_stop]* total_cell_num,'g--',label='CSC self-renewal rate, no treatment_'+str(lll_load))
-        axDftn[1].semilogy(dataN[nn][tt][uu][ss][ww][vv][lll_load][0,:st0_stop],2*(1-p/(1+l*dataN[nn][tt][uu][ss][ww][vv][lll_load][2,:st0_stop]))*(r1/(1+h1*dataN[nn][tt][uu][ss][ww][vv][lll_load][2,:st0_stop]/(1+h1a*dataN[nn][tt][uu][ss][ww][vv][lll_load][1,:st0_stop]))) * dataN[nn][tt][uu][ss][ww][vv][lll_load][1,:st0_stop]* total_cell_num,'g-',label='CSC differentiation rate, no treatment_'+str(lll_load))
+        axDftn[0].semilogy(dataN[nn][tt][uu][ss][ww][vv][lll_load][0,:st0_stop:step],(2*p/(1+l*dataN[nn][tt][uu][ss][ww][vv][lll_load][2,:st0_stop:step])-1)*(r1/(1+h1*dataN[nn][tt][uu][ss][ww][vv][lll_load][2,:st0_stop:step]/(1+h1a*dataN[nn][tt][uu][ss][ww][vv][lll_load][1,:st0_stop:step]))) * dataN[nn][tt][uu][ss][ww][vv][lll_load][1,:st0_stop:step]* total_cell_num,'g--',label='CSC self-renewal rate, no treatment_'+str(lll_load))
+        axDftn[1].semilogy(dataN[nn][tt][uu][ss][ww][vv][lll_load][0,:st0_stop:step],2*(1-p/(1+l*dataN[nn][tt][uu][ss][ww][vv][lll_load][2,:st0_stop:step]))*(r1/(1+h1*dataN[nn][tt][uu][ss][ww][vv][lll_load][2,:st0_stop:step]/(1+h1a*dataN[nn][tt][uu][ss][ww][vv][lll_load][1,:st0_stop:step]))) * dataN[nn][tt][uu][ss][ww][vv][lll_load][1,:st0_stop:step]* total_cell_num,'g-',label='CSC differentiation rate, no treatment_'+str(lll_load))
 
         axNetDiv.semilogy(
-            dataN[nn][tt][uu][ss][ww][vv][lll_load][0,:st0_stop],(2*(1-p/(1+l*dataN[nn][tt][uu][ss][ww][vv][lll_load][2,:st0_stop]))*(r1/(1+h1*dataN[nn][tt][uu][ss][ww][vv][lll_load][2,:st0_stop]/(1+h1a*dataN[nn][tt][uu][ss][ww][vv][lll_load][1,:st0_stop])))*dataN[nn][tt][uu][ss][ww][vv][lll_load][1,:st0_stop] + 
-                              (r2/(1+h2*dataN[nn][tt][uu][ss][ww][vv][lll_load][2,:st0_stop]) * xi3*dataN[nn][tt][uu][ss][ww][vv][lll_load][1,:st0_stop]/(1+xi3*dataN[nn][tt][uu][ss][ww][vv][lll_load][1,:st0_stop]) - 
-                               d-(death_r2_mult*r2-d)*hd*dataN[nn][tt][uu][ss][ww][vv][lll_load][2,:st0_stop]/(1+hd*dataN[nn][tt][uu][ss][ww][vv][lll_load][2,:st0_stop])) * dataN[nn][tt][uu][ss][ww][vv][lll_load][2,:st0_stop]
+            dataN[nn][tt][uu][ss][ww][vv][lll_load][0,:st0_stop:step],(2*(1-p/(1+l*dataN[nn][tt][uu][ss][ww][vv][lll_load][2,:st0_stop:step]))*(r1/(1+h1*dataN[nn][tt][uu][ss][ww][vv][lll_load][2,:st0_stop:step]/(1+h1a*dataN[nn][tt][uu][ss][ww][vv][lll_load][1,:st0_stop:step])))*dataN[nn][tt][uu][ss][ww][vv][lll_load][1,:st0_stop:step] + 
+                              (r2/(1+h2*dataN[nn][tt][uu][ss][ww][vv][lll_load][2,:st0_stop:step]) * xi3*dataN[nn][tt][uu][ss][ww][vv][lll_load][1,:st0_stop:step]/(1+xi3*dataN[nn][tt][uu][ss][ww][vv][lll_load][1,:st0_stop:step]) - 
+                               d-(death_r2_mult*r2-d)*hd*dataN[nn][tt][uu][ss][ww][vv][lll_load][2,:st0_stop:step]/(1+hd*dataN[nn][tt][uu][ss][ww][vv][lll_load][2,:st0_stop:step])) * dataN[nn][tt][uu][ss][ww][vv][lll_load][2,:st0_stop:step]
                               )* total_cell_num,'g-',label='DCC overall division, no treatment_'+str(lll_load))
 
         #axFdbk[0,0].axhline(y = r2, color = 'r', linestyle = '-')
@@ -628,8 +650,9 @@ if use_muQ:
         axDftn[0].legend(fancybox=True, framealpha=0.5);
         axDftn[1].legend(fancybox=True, framealpha=0.5);
         axFdbk[0].set_ylabel("DCC rate coefficients"+log_str)
+        axFdbk[0].set_xlabel("time (days)")
         axFdbk[1].set_xlabel("time (days)")
-        axFdbk[0].set_ylabel("CSC total division rate coefficients"+log_str)
+        axFdbk[1].set_ylabel("CSC total division rate coefficients"+log_str)
         axFdbk[1].set_xlabel("time (days)")
         axDftn[0].set_ylabel("CSC self-renewal rate"+log_str)
         axDftn[1].set_xlabel("time (days)")
@@ -676,13 +699,13 @@ if compBaselineQ:
             stC_stop = np.flatnonzero(data2C[ww][vv][lll_load][0] < T_stop).max();
             s_sig = '('+ str(el) +')';
             s_null = ', RT only no mu'
-            axVec[0].plot(data2C[ww][vv][lll_load][0,:stC_stop],data2C[ww][vv][lll_load][1,:stC_stop] * total_cell_num,'c--',label='CSC'+s_null+s_lgd_0+s_sig+'_'+str(lll_load))
-            axVec[1].plot(data2C[ww][vv][lll_load][0,:stC_stop],data2C[ww][vv][lll_load][2,:stC_stop] * total_cell_num,'c-',label='DCC'+s_null+s_lgd_0+s_sig+'_'+str(lll_load))
-            axVec[2].plot(data2C[ww][vv][lll_load][0,:stC_stop],data2C[ww][vv][lll_load][3,:stC_stop],'c:',label='mu'+s_null+s_sig+'_'+str(lll_load))
-            axVec[3].plot(data2C[ww][vv][lll_load][0,:stC_stop],(data2C[ww][vv][lll_load][1,:stC_stop]+data2C[ww][vv][lll_load][2,:stC_stop]) * total_cell_num,'c--',label='total'+s_null+s_lgd_0+s_sig+'_'+str(lll_load))
+            axVec[0].plot(data2C[ww][vv][lll_load][0,:stC_stop:step],data2C[ww][vv][lll_load][1,:stC_stop:step] * total_cell_num,'c--',label='CSC'+s_null+s_lgd_0+s_sig+'_'+str(lll_load))
+            axVec[1].plot(data2C[ww][vv][lll_load][0,:stC_stop:step],data2C[ww][vv][lll_load][2,:stC_stop:step] * total_cell_num,'c-',label='DCC'+s_null+s_lgd_0+s_sig+'_'+str(lll_load))
+            axVec[2].plot(data2C[ww][vv][lll_load][0,:stC_stop:step],data2C[ww][vv][lll_load][3,:stC_stop:step],'c:',label='mu'+s_null+s_sig+'_'+str(lll_load))
+            axVec[3].plot(data2C[ww][vv][lll_load][0,:stC_stop:step],(data2C[ww][vv][lll_load][1,:stC_stop:step]+data2C[ww][vv][lll_load][2,:stC_stop:step]) * total_cell_num,'c--',label='total'+s_null+s_lgd_0+s_sig+'_'+str(lll_load))
             csc_p_0 = data2C[ww][vv][lll_load][1]/(data2C[ww][vv][lll_load][1] + data2C[ww][vv][lll_load][2])
-            axVec[4].plot(data2C[ww][vv][lll_load][0,:stC_stop],csc_p_0[:stC_stop],'c-',label='CSC'+s_null+s_lgd_0+s_sig+'_'+str(lll_load))
-            axVec[5].plot(data2C[ww][vv][lll_load][0,:stC_stop],beta * data2C[ww][vv][lll_load][3,:stC_stop] * data2C[ww][vv][lll_load][2,:stC_stop] * total_cell_num,'c-',label='mu rate'+s_null+s_lgd_0+s_sig+'_'+str(lll_load))
+            axVec[4].plot(data2C[ww][vv][lll_load][0,:stC_stop:step],csc_p_0[:stC_stop:step],'c-',label='CSC'+s_null+s_lgd_0+s_sig+'_'+str(lll_load))
+            axVec[5].plot(data2C[ww][vv][lll_load][0,:stC_stop:step],beta * data2C[ww][vv][lll_load][3,:stC_stop:step] * data2C[ww][vv][lll_load][2,:stC_stop:step] * total_cell_num,'c-',label='mu rate'+s_null+s_lgd_0+s_sig+'_'+str(lll_load))
     #[axVec[i].legend() for i in [0,1,2,3,4,5]]
     [axVec[i].set_xlim(0,T_stop+100) for i in [0,1,2,3,4,5]]
 # only relevant for feedback regime 6, model 0 or 1.

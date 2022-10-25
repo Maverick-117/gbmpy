@@ -15,10 +15,10 @@ def dU_dt_old(U,t, r1, r2, d, p, h1, h2, hd, z, l, n, sig, mu_bar, rho, xi1, xi2
                     ])
     # make simulations, argue from equations
 
-def dU_dt(U,t, r1, r2, d, p, h1, h2, hd, z, l, n, sig, mu_bar, rho, xi1, xi2, ddd, xi3, h1a):
+def dU_dt(U,t, r1, r2, d, p, h1, h2, hd, z, l, n, sig, mu_bar, rho, xi1, xi2, ddd, xi3, dsc):
     #function dU = stem_ODE_feedback(t, U, r1, r2, d, p, h, hd, z, l, n, sig, mu_bar, chi)
-    dudt=(2*p/(1+l*U[1]**n)-1)*r1/(1+h1*U[1]**n/(1+h1a*U[0]))*U[0] + rho* xi1*ddd/(1+xi1*ddd) *U[2] * U[1];# 
-    dvdt=2*(1-p/(1+l*U[1]**n))*r1/(1+h1*U[1]**n/(1+h1a*U[0]))*U[0] + U[1] * (r2/(1+h2*U[1]**n) * xi3*U[0]/(1+xi3*U[0]) - d-(1.1*r2-d)*hd*U[1]**n/(1+hd*U[1]**n) -rho * xi1*ddd/(1+xi1*ddd) * U[2])
+    dudt=(2*p/(1+l*U[1]**n)-1)*r1/(1+h1*U[1]**n)*U[0] + rho* xi1*ddd/(1+xi1*ddd) *U[2] * U[1] - dsc * U[0];# 
+    dvdt=2*(1-p/(1+l*U[1]**n))*r1/(1+h1*U[1]**n)*U[0] + U[1] * (r2/(1+h2*U[1]**n) * xi3*U[0]/(1+xi3*U[0]) - d-(1.1*r2-d)*hd*U[1]**n/(1+hd*U[1]**n) -rho * xi1*ddd/(1+xi1*ddd) * U[2])
     dmudt=sig * (1/(1+xi2*ddd))* (mu_bar - U[2]);# 
     return np.array([dudt, #- 0*(d+(1.1*r2-d)*hd*U[1]**n/(1+hd*U[1]**n)) * U[0], 
                      dvdt,
@@ -61,7 +61,7 @@ def radiotherapy(U, LQ_para, surv_vec):
     [cont_p_a, cont_p_b, compt_mult, srvn_csc, srvn_dcc, cont_c, useMuQ] = surv_vec;
     SF_U =  np.exp(-a1*D-b1*D**2);
     SF_V = np.exp(-a2*D-b2*D**2);
-    mu_new = (mu +c * D+ .01428 )* useMuQ;  # 2 Nov: added "+ .01428" 
+    mu_new = (mu +c * D)* useMuQ;  # 2 Nov 2021: added "+ .01428"  #21 Oct 2022: removed "+ .01428"
     v_new = max(0,(1 - min(1,mu_new))*SF_V*v);
     u_new = u*SF_U + min(1,mu_new)*SF_V*v;
     return [u_new,v_new, mu_new,SF_U, SF_V]
@@ -115,7 +115,7 @@ def dynamics(para_values, sim_values):
         T = np.concatenate((T, T_int))
 
     #print("done")
-    T_none = np.linspace(0, treat_days[-1],3*time_pts2)
+    T_none = np.linspace(0, treat_days[-1],10*time_pts2)
     U_none = integrate.odeint(dU_dt, U0, T_none, args=para_values).T
     
     return U, T, U_none, T_none
@@ -163,7 +163,7 @@ def parameter_setup(switch_vec, misc_pars):
     if kimICQ:
         total_start_frac = 0.0005/64; # Victoria: 0.2/64; Nayeon: 0.0005/64
     else:
-        total_start_frac = 0.2/64;
+        total_start_frac = 1.0/64;
     
     # death rate of DCC
     if kimDeathValQ:

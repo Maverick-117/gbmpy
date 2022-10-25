@@ -55,7 +55,7 @@ pwr = 3;#Inf;
 ROI_radius = 1; # Radius of the simulation region of intrest
 #rho = 10**9; # density of cells in the region of interest (cells/cm^3)
 total_cell_num = 4/3*np.pi*(ROI_radius ** 3)*10**9;
-post_therapy_end = 5000;
+post_therapy_end = 2000;
 #mu_start = 0.0143;
 ss = [0,1,6,7];#[0,1,6,7];#np.arange(12).tolist();#np.arange(12).tolist();#[6];#[4,8,9,5,10,11];
 #[0,1,3,4,8,9,5,10,11];#[4,8,9,5,10,11];[0,1,2,3,6,7]
@@ -63,7 +63,7 @@ z = 1; n = 1;
 l_vec =  [0,  0, l_w, l_s, l_w , l_s , 0 ,0 ,l_w,l_w,l_s,l_s];
 h1_vec = [0, h1, 0  , 0  , h1  , h1  , h1,0 ,h1 ,0  , h1, 0 ];
 h2_vec = [0, h2, 0  , 0  , h2  , h2  , 0 ,h2,0  ,h2 , 0 , h2];
-h1a = 1e3;
+dsc = 0;
 # man-behind-the-curtain setup.
 switch_vec = [subSelectQ, use_muQ, compDosesQ, deathFdbkQ, c_dep_sQ, kimReprogQ, kimDeathValQ, kimICQ, model0Q, model1Q, model2Q];
 misc_pars = [DT, post_therapy_end, pwr, h1, h2, l_vec, ss, a, b];
@@ -101,8 +101,8 @@ cell_lines = ["U373MG"];
 
 #### VARIATION ZONE FOR PARAMETERS
 d *= 1;
-time_pts1 = 500;
-time_pts2 = 500;
+time_pts1 = 700;
+time_pts2 = 700;
 
 '''cases list
 Srvn_test = model1Q is True
@@ -165,10 +165,10 @@ reversionAttempt6a (debug0) := no xi1's in the numerator
 debug2 := xi1 in dU/dt and dV/dt's numerator
 feedbackCheck := trying different kinds of feedback for the V-only feedback regimes. also tried a 1000000 day run
 '''
-day_month = "8_Aug"; #05_July last used
+day_month = "21_Oct"; #05_July last used
 base_model_name = 'k2_model' # note: all the rho-sig sims should really fall into a model folder...
 model_suffix = "conventional_BED\\"#"comparing_conventionals\\";
-case = "test";#finalRunCvary for varying C. doseCheckRho means that the rho is constant. 
+case = "reversal";#finalRunCvary for varying C. doseCheckRho means that the rho is constant. 
 if goldenLaptopQ:
     base_dirGD = 'C:\\Users\\jhvo9\\Google Drive (vojh1@uci.edu)';#"/DFS-L/DATA/lowengrub/vojh1";#"C:\\Users\\jhvo9\\Google Drive (vojh1@uci.edu)"
 else:
@@ -288,7 +288,7 @@ for lll in rng:
                                             LQ_param = [a1, b1, a2, b2, c, D];
                                             surv_vec = [cont_p_a, cont_p_b, compt_mult, srvn_csc, srvn_dcc, cont_c, useMuQ]; #assuming these control parameters are constant                                        
                                             sim_values = [model0Q, model1Q, model2Q, kimReprogQ, total_cell_num, treat_days, mu_start, LQ_param, total_start_frac, sc_start, sim_resume_days, surv_vec, time_pts1, time_pts2];
-                                            para_values = (r1, r2, d, p, h1, h2, hd, z, l, n, sig, mu_bar, rho, xi1, xi2, D, xi3, h1a);
+                                            para_values = (r1, r2, d, p, h1, h2, hd, z, l, n, sig, mu_bar, rho, xi1, xi2, D, xi3, dsc);
                                             
                                             U, T, U_none, T_none = funciones.dynamics(para_values,sim_values);
                                             u_sc[k] = U[0,:];
@@ -303,6 +303,12 @@ for lll in rng:
                                             #### Saving Data
                                             if saveQ:
                                                 print("Saving", total_drty_rho_sig+"\\TU_"+fix_str+str(comp_list[k])+'_'+comp_str+'_'+str(Frac_list[k])+'_Fracs_'+str(post_therapy_end)+'days_'+deathFdbk_str+"_"+s_useMuQ+"_"+str(lll)+".txt")
-                                                np.savetxt(total_drty_rho_sig+"\\TU_"+fix_str+str(comp_list[k])+'_'+comp_str+'_'+str(Frac_list[k])+'_Fracs_'+str(post_therapy_end)+'days_'+deathFdbk_str+"_"+s_useMuQ+"_"+str(lll)+".txt",[t_vec[k], u_sc[k], u_dc[k], u_srv[k]],header="Time, CSC, DCC, SRV")
+                                                np.savetxt(
+                                                    total_drty_rho_sig+"\\TU_"+fix_str+str(comp_list[k])+'_'+comp_str+'_'+str(Frac_list[k])+'_Fracs_'+str(post_therapy_end)+'days_'+deathFdbk_str+"_"+s_useMuQ+"_"+str(lll)+".txt",
+                                                    [t_vec[k], u_sc[k], u_dc[k], u_srv[k]],
+                                                    header="Time, CSC, DCC, SRV")
                                                 print("Saving", total_drty_rho_sig+"\\TU_none_"+fix_str+str(comp_list[k])+'_'+comp_str+'_'+str(Frac_list[k])+'_Fracs_'+str(post_therapy_end)+'days_'+deathFdbk_str+"_"+s_useMuQ+"_"+str(lll)+".txt")
-                                                np.savetxt(total_drty_rho_sig+"\\TU_none_"+fix_str+str(comp_list[k])+'_'+comp_str+'_'+str(Frac_list[k])+'_Fracs_'+str(post_therapy_end)+'days_'+deathFdbk_str+"_"+s_useMuQ+"_"+str(lll)+".txt",[tn_vec[k], un_sc[k], un_dc[k], un_srv[k]],header="Time_n, CSC_n, DCC_n, SRV_n")
+                                                np.savetxt(
+                                                    total_drty_rho_sig+"\\TU_none_"+fix_str+str(comp_list[k])+'_'+comp_str+'_'+str(Frac_list[k])+'_Fracs_'+str(post_therapy_end)+'days_'+deathFdbk_str+"_"+s_useMuQ+"_"+str(lll)+".txt",
+                                                    [tn_vec[k], un_sc[k], un_dc[k], un_srv[k]],
+                                                    header="Time_n, CSC_n, DCC_n, SRV_n")
