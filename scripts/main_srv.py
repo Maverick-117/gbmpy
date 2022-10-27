@@ -25,7 +25,7 @@ model1Q = False; # true: using vo's survivin-protects model and equations; false
 model2Q = False; # true: using vo's survivin-protects-dedifferentiates model and equations; false: not using it
 
 ### VARS RELATED TO EXPERIMENTAL QUESTS ###
-goldenLaptopQ = False;
+goldenLaptopQ = True;
 schedChangeQ = False;
 
 deathFdbkQ = True; # false: set death feedback gain to 0; true: don't use the false option
@@ -57,7 +57,7 @@ ROI_radius = 1; # Radius of the simulation region of intrest
 total_cell_num = 4/3*np.pi*(ROI_radius ** 3)*10**9;
 post_therapy_end = 2000;
 #mu_start = 0.0143;
-ss = [0,1,6,7];#[0,1,6,7];#np.arange(12).tolist();#np.arange(12).tolist();#[6];#[4,8,9,5,10,11];
+ss = [6];#[3,5,10,11];#np.arange(12).tolist();#np.arange(12).tolist();#[6];#[4,8,9,5,10,11];
 #[0,1,3,4,8,9,5,10,11];#[4,8,9,5,10,11];[0,1,2,3,6,7]
 z = 1; n = 1;
 l_vec =  [0,  0, l_w, l_s, l_w , l_s , 0 ,0 ,l_w,l_w,l_s,l_s];

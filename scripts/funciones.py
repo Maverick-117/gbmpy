@@ -181,7 +181,7 @@ def parameter_setup(switch_vec, misc_pars):
         # Doses = [1, 2, 40/15, 34/10, 5]; # dose fraction sizes in Gy
         # Frac = [60, 30, 15 ,10, 5]; 
         #Doses = np.arange(1,11).tolist();#, 34/10, 5]; # dose fraction sizes in Gy
-        Doses = [2.0]; #np.arange(2,22,2,dtype=float);#sorted(np.arange(1,21,dtype=float).tolist() + [40/15,34/10]);
+        Doses = np.arange(2,22,2,dtype=float);#sorted(np.arange(1,21,dtype=float).tolist() + [40/15,34/10]);
         Frac = list(map(lambda d: float(np.floor(calc_BED_Frac(.17,.02,d))),Doses)); # 25*(1+(5)/8.5)
         # Doses = [2.0,2.0];#np.sort(np.append(np.arange(1,21),[40/15,34/10])).tolist(); # dose fraction sizes in Gy
         # Frac = [30.0,31.0];#list(map(lambda d:calc_BED_Frac(a,b,d),Doses));#,baseline_BED=25*(1+5/8.5)

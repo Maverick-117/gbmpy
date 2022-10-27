@@ -12,7 +12,7 @@ updated to use mu, rho, and sigma
 
 import matplotlib.pyplot as plt;
 import numpy as np;
-from os import makedirs
+from os import makedirs, chdir
 from os.path import exists
 import matplotlib;
 from funciones import calc_EOT, get_EOT_index_pre, calc_BED_Frac
@@ -38,7 +38,7 @@ font = {'weight' : 'bold',
 matplotlib.rc('font', **font)
 
 total_cell_num = 4/3*np.pi*(1 ** 3)*1e9;
-goldenLaptopQ = False;
+goldenLaptopQ = True;
 compDosesQ = True; #true: yes you're comparing doses; false: no, you're comparing reprogramming versus non-reprogramming
 saveQ = False;
 log_yscaleQ = False;
@@ -73,14 +73,14 @@ else:
     log_str = "";
     log_dir = "\\linear_yscale\\"
 ### TO VARY
-deathFdbkQ = True; # false: set death feedback gain to 0; true: don't use the false option
+deathFdbkQ = False; # false: set death feedback gain to 0; true: don't use the false option
 comp_conventional_60_30Q = True;
 
 ### SETTINGS
 base_model_name = 'k2_model'
 #case = "34";
 model_suffix = "conventional_BED"#
-date_data_dir = '28_Mar\\'
+date_data_dir = '21_Oct\\'
 date_plot_dir = '28_Mar\\'; 
 # 11_Dec, T_stop = 1200 and add some post-EOT times to see the minor but clear evidence that post-1 year dynamics aren't flat
 if kimDeathValQ:
@@ -102,7 +102,7 @@ FracsEmp = [60,30,15   ,10   ,5];
 TotalDoseEmp = [int(DosesEmp[i]*FracsEmp[i]) for i in range(len(DosesEmp))];
 BEDEmp = [TotalDoseEmp[i] * (1+DosesEmp[i]/8.5) for i in range(len(DosesEmp))];
 base_idxs = list(range(1,len(DosesEmp)));
-sig_list = [0.01];#sorted(list(map(lambda p:  10 ** (p), np.arange(-1,3).tolist()))+[0]);
+sig_list = [0.1];#sorted(list(map(lambda p:  10 ** (p), np.arange(-1,3).tolist()))+[0]);
 rho_list = [0.2];#sorted(list(map(lambda p: 2 ** (p), np.arange(0,-3,-1).tolist())) + [0,2]);
 # rename rho to rho
 xi1_list = [0.01];#sorted(list(map(lambda p:  10 ** (p), np.arange(-1,3).tolist()))+[0]);
@@ -110,9 +110,9 @@ xi2_list = [1];#sorted(list(map(lambda p:  10 ** (p), np.arange(-1,3).tolist()))
 xi3_list = [1e9];
 days_past_treatment = [30,90,180,360,720];
 pick_idx = [1];
-T_stop = 1000;#int(t_vec.max());
+T_stop = 2000;#int(t_vec.max());
 
-Doses =[2.0,4.0,6.0,8.0,10.0];#sorted(np.arange(1,21,dtype=float).tolist() + DosesEmp[2:5]);
+Doses =[2.0,4.0,6.0,8.0,10.0,12.0,14.0,16.0,18.0,20.0];#sorted(np.arange(1,21,dtype=float).tolist() + DosesEmp[2:5]);
 
 #collect time points in the space of parameters we're working with
 #results_mtx = np.ones((4,len(Doses),len(days_past_treatment),4)); # BED x Doses x DPT x cell-types
@@ -139,9 +139,9 @@ for p,ref_idx in enumerate(pick_idx): # per BED (p)
     elif ref_idx in [0,4]:
         # case = str(TotalDoseEmp[ref_idx]);
         case_str = str(DosesEmp[ref_idx])+" Gy";
-    case = 'finalRunCvary'
+    case = 'reversal'
     # case_str = "conventional";
-    C = [ 5.196*10**(-5), 5.196*10**(-5)];
+    C = [ 5.196*10**(-3), 5.196*10**(-3)];
     fix_str = str(C[0])+"_reprog";
     comp_dir = "Gy_vs_conv"
     comp_list = Doses;
@@ -196,7 +196,7 @@ for p,ref_idx in enumerate(pick_idx): # per BED (p)
             s_xi3 = '\\' + str(els);
             for tt, elt in enumerate(xi1_list):
                 xi1 = elt;
-                s_xi1 = '\\'+str(elt);
+                s_xi1 = str(elt);
                 for uu, elu in enumerate(xi2_list):
                     xi2 = elu;
                     s_xi2 = '\\'+str(elu);
@@ -218,8 +218,9 @@ for p,ref_idx in enumerate(pick_idx): # per BED (p)
                                 dsg = float(comp_list[pulley]);
                             s_fr_0 = '_'+str(float(Fracs[1]))+'_Fracs_'+str(T_stop)+'days_';
                             s_fr_1 = '';#'_'+str(Fracs[1])+'_Fracs_';
-                            plot_str = "TU_"+str(C[0])+"_reprog"+str(dsg)+'_'+comp_str+s_fr_0+deathFdbk_str+"_w_reprog_"+str(lll_load);
-                            plotn_str = "TU_"+str(C[1])+"_reprog"+str(dsg)+'_'+comp_str+s_fr_0+deathFdbk_str+"_w_no_reprog_"+str(lll_load);
+                            plot_str = "\\TU_"+str(C[0])+"_reprog"+str(dsg)+'_'+comp_str+s_fr_0+deathFdbk_str+"_w_reprog_"+str(lll_load);
+                            plotn_str = "\\TU_"+str(C[1])+"_reprog"+str(dsg)+'_'+comp_str+s_fr_0+deathFdbk_str+"_w_no_reprog_"+str(lll_load);
+                            #chdir()
                             TU_2Gy = np.loadtxt(data_drty+plot_str+".txt");
                             TU_2Gy_none = np.loadtxt(data_drty+plotn_str+".txt");
                             t2_vec = TU_2Gy[0,:];

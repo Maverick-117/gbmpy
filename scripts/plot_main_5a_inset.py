@@ -92,8 +92,8 @@ T_stop = 2000;
 step = 1;
 
 # ss
-load_temp = [0,1,6,7];#np.arange(12).tolist();#[1,3,5,6,7,10,11];#np.arange(12).tolist();
-deathFdbkQ = False;
+load_temp = [3,5,10,11];#np.arange(12).tolist();#[1,3,5,6,7,10,11];#np.arange(12).tolist();
+deathFdbkQ = True;
 death_r2_mult = 1.1;
 log_yscaleQ = True;
 if log_yscaleQ:
@@ -158,7 +158,7 @@ else:
 # Nsched_vec = [0,1];
 Nsched_vec_str = ['',' (delayed)']
 
-goldenLaptopQ = False;
+goldenLaptopQ = True;
 
 if goldenLaptopQ:
     prefix = "C:\\Users\\jhvo9\\Google Drive (vojh1@uci.edu)";
