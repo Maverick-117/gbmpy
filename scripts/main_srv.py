@@ -25,7 +25,7 @@ model1Q = False; # true: using vo's survivin-protects model and equations; false
 model2Q = False; # true: using vo's survivin-protects-dedifferentiates model and equations; false: not using it
 
 ### VARS RELATED TO EXPERIMENTAL QUESTS ###
-goldenLaptopQ = True;
+goldenLaptopQ = False;
 schedChangeQ = False;
 
 deathFdbkQ = True; # false: set death feedback gain to 0; true: don't use the false option
@@ -86,7 +86,7 @@ if use_muQ:
     xi2_list = [1];#[1];#sorted(list(map(lambda p:  10 ** (p), np.arange(-1,3).tolist()))+[0]);##[.1];#sorted(list(map(lambda p:  10 ** (p), np.arange(0,3).tolist()))+[0])
     xi3_list = [1e9];
 else:
-    sig_list = [0];
+    sig_list = [6];
 
 if schedChangeQ:
     Nsched_list = [1];
@@ -165,10 +165,10 @@ reversionAttempt6a (debug0) := no xi1's in the numerator
 debug2 := xi1 in dU/dt and dV/dt's numerator
 feedbackCheck := trying different kinds of feedback for the V-only feedback regimes. also tried a 1000000 day run
 '''
-day_month = "21_Oct"; #05_July last used
+day_month = "16_Dec"; #05_July last used
 base_model_name = 'k2_model' # note: all the rho-sig sims should really fall into a model folder...
 model_suffix = "conventional_BED\\"#"comparing_conventionals\\";
-case = "reversal";#finalRunCvary for varying C. doseCheckRho means that the rho is constant. 
+case = "debug";#finalRunCvary for varying C. doseCheckRho means that the rho is constant. 
 if goldenLaptopQ:
     base_dirGD = 'C:\\Users\\jhvo9\\Google Drive (vojh1@uci.edu)';#"/DFS-L/DATA/lowengrub/vojh1";#"C:\\Users\\jhvo9\\Google Drive (vojh1@uci.edu)"
 else:
