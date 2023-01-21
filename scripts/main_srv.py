@@ -44,6 +44,8 @@ treat_start = 100; # treatment start time relative to start of simulation
 acq_days_after_RT = 110; # simulation length after last fraction
 
 # DE parameters
+eff = 1.0;
+hU = 10 ** (-1);
 r1 = np.log(2)/DT; # growth rate of CSC
 r2 = np.log(2)/DT; # growth rate of DCC
 p = .505; # self renewal probability 
@@ -165,10 +167,10 @@ reversionAttempt6a (debug0) := no xi1's in the numerator
 debug2 := xi1 in dU/dt and dV/dt's numerator
 feedbackCheck := trying different kinds of feedback for the V-only feedback regimes. also tried a 1000000 day run
 '''
-day_month = "16_Dec"; #05_July last used
+day_month = "6_Jan"; #05_July last used
 base_model_name = 'k2_model' # note: all the rho-sig sims should really fall into a model folder...
 model_suffix = "conventional_BED\\"#"comparing_conventionals\\";
-case = "debug";#finalRunCvary for varying C. doseCheckRho means that the rho is constant. 
+case = "hU";#finalRunCvary for varying C. doseCheckRho means that the rho is constant. 
 if goldenLaptopQ:
     base_dirGD = 'C:\\Users\\jhvo9\\Google Drive (vojh1@uci.edu)';#"/DFS-L/DATA/lowengrub/vojh1";#"C:\\Users\\jhvo9\\Google Drive (vojh1@uci.edu)"
 else:
@@ -286,9 +288,9 @@ for lll in rng:
                                             sim_resume_days = treat_days+10/(60*24); # ODE simulation resumes 10 minutes after RT
                                             treat_days = np.array(treat_days.tolist() + [acq_end]);  
                                             LQ_param = [a1, b1, a2, b2, c, D];
-                                            surv_vec = [cont_p_a, cont_p_b, compt_mult, srvn_csc, srvn_dcc, cont_c, useMuQ]; #assuming these control parameters are constant                                        
+                                            surv_vec = [cont_p_a, cont_p_b, compt_mult, srvn_csc, srvn_dcc, cont_c, useMuQ, eff]; #assuming these control parameters are constant                                        
                                             sim_values = [model0Q, model1Q, model2Q, kimReprogQ, total_cell_num, treat_days, mu_start, LQ_param, total_start_frac, sc_start, sim_resume_days, surv_vec, time_pts1, time_pts2];
-                                            para_values = (r1, r2, d, p, h1, h2, hd, z, l, n, sig, mu_bar, rho, xi1, xi2, D, xi3, dsc);
+                                            para_values = (r1, r2, d, p, h1, h2, hd, z, l, n, sig, mu_bar, rho, xi1, xi2, D, xi3, dsc, hU);
                                             
                                             U, T, U_none, T_none = funciones.dynamics(para_values,sim_values);
                                             u_sc[k] = U[0,:];

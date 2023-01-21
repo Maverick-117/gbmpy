@@ -62,7 +62,7 @@ h2_vec = [0, h2, 0  , 0  , h2  , h2  , 0 ,h2,0  ,h2 , 0 , h2];
 if subSelectQ:
     #lll_vec = [pre_lll_load];
     #lll_vec = [4,8,9];
-    lll_vec = [6];
+    lll_vec = [7];
     #[4,8,9,5,10,11];#[0,1,3,4,8,9,5,10,11];#[4,8,9,5,10,11];
 else:
     lll_vec = list(range(len(l_vec)));

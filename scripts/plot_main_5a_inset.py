@@ -145,7 +145,7 @@ if use_muQ:
     s_xi3_vec = ['\\' + str(els) for els in xi3_vec];
     s_sig_vec = ['\\' + str(el) for el in sig_vec];
     s_rho_vec = ['\\' + str(elb) + '\\' for elb in rho_vec];
-    case = 'debug\\16_Dec';#'reversal\\21_Oct';#'mathCheck\\2_Feb'#'reversionAttempt4\\14_Nov';#'muNN-l2b\\2_Nov';#'baseline\\31_Oct';
+    case = 'hU\\6_Jan';#'reversal\\21_Oct';#'mathCheck\\2_Feb'#'reversionAttempt4\\14_Nov';#'muNN-l2b\\2_Nov';#'baseline\\31_Oct';
 else:
     sig_vec=[0];
     s_sig_vec = ['\\0\\'];
