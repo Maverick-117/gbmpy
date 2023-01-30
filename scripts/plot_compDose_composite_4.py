@@ -62,7 +62,7 @@ h2_vec = [0, h2, 0  , 0  , h2  , h2  , 0 ,h2,0  ,h2 , 0 , h2];
 if subSelectQ:
     #lll_vec = [pre_lll_load];
     #lll_vec = [4,8,9];
-    lll_vec = [7];
+    lll_vec = [6];
     #[4,8,9,5,10,11];#[0,1,3,4,8,9,5,10,11];#[4,8,9,5,10,11];
 else:
     lll_vec = list(range(len(l_vec)));
@@ -80,7 +80,7 @@ comp_conventional_60_30Q = True;
 base_model_name = 'k2_model'
 #case = "34";
 model_suffix = "conventional_BED"#
-date_data_dir = '16_Dec\\'
+date_data_dir = '24_Jan\\'
 date_plot_dir = '28_Mar\\'; 
 # 11_Dec, T_stop = 1200 and add some post-EOT times to see the minor but clear evidence that post-1 year dynamics aren't flat
 if kimDeathValQ:
@@ -139,7 +139,7 @@ for p,ref_idx in enumerate(pick_idx): # per BED (p)
     elif ref_idx in [0,4]:
         # case = str(TotalDoseEmp[ref_idx]);
         case_str = str(DosesEmp[ref_idx])+" Gy";
-    case = 'debug'
+    case = 'dynReprogMin'
     # case_str = "conventional";
     C = [ 5.196*10**(-3), 5.196*10**(-3)];
     fix_str = str(C[0])+"_reprog";

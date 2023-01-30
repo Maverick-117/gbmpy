@@ -73,7 +73,7 @@ h1a = 0;
 saveQ = False;
 cases = ["2 Gy", "2.67 Gy" , "3.4 Gy", "5 Gy"]; 
 comp_str = "Gy";
-Doses = [2.0,2.0];
+Doses = [12.0,12.0];
 Fracs = [calc_BED_Frac(.17,.02,Doses[0]),calc_BED_Frac(.17,.02,Doses[1])]#list(map(lambda d:calc_BED_Frac(a,b,d,40*(1+(3.4)/8.5)),Doses));#;[25,20]
 EOTs  = [calc_EOT(Fracs[0],100), calc_EOT(Fracs[1],100)];
 EOT_diff = EOTs[0] - EOTs[1];
@@ -145,7 +145,7 @@ if use_muQ:
     s_xi3_vec = ['\\' + str(els) for els in xi3_vec];
     s_sig_vec = ['\\' + str(el) for el in sig_vec];
     s_rho_vec = ['\\' + str(elb) + '\\' for elb in rho_vec];
-    case = 'hU\\6_Jan';#'reversal\\21_Oct';#'mathCheck\\2_Feb'#'reversionAttempt4\\14_Nov';#'muNN-l2b\\2_Nov';#'baseline\\31_Oct';
+    case = 'dynReprogMin\\24_Jan';#'hU\\6_Jan';#'reversal\\21_Oct';#'mathCheck\\2_Feb'#'reversionAttempt4\\14_Nov';#'muNN-l2b\\2_Nov';#'baseline\\31_Oct';
 else:
     sig_vec=[0];
     s_sig_vec = ['\\0\\'];

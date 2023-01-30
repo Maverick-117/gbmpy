@@ -167,10 +167,10 @@ reversionAttempt6a (debug0) := no xi1's in the numerator
 debug2 := xi1 in dU/dt and dV/dt's numerator
 feedbackCheck := trying different kinds of feedback for the V-only feedback regimes. also tried a 1000000 day run
 '''
-day_month = "6_Jan"; #05_July last used
+day_month = "24_Jan"; #6_Jan has some interesting stuff,
 base_model_name = 'k2_model' # note: all the rho-sig sims should really fall into a model folder...
 model_suffix = "conventional_BED\\"#"comparing_conventionals\\";
-case = "hU";#finalRunCvary for varying C. doseCheckRho means that the rho is constant. 
+case = "dynReprogMin";#finalRunCvary for varying C. doseCheckRho means that the rho is constant. 
 if goldenLaptopQ:
     base_dirGD = 'C:\\Users\\jhvo9\\Google Drive (vojh1@uci.edu)';#"/DFS-L/DATA/lowengrub/vojh1";#"C:\\Users\\jhvo9\\Google Drive (vojh1@uci.edu)"
 else:
