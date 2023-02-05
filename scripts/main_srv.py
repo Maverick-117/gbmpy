@@ -55,9 +55,9 @@ pwr = 3;#Inf;
 ROI_radius = 1; # Radius of the simulation region of intrest
 #rho = 10**9; # density of cells in the region of interest (cells/cm^3)
 total_cell_num = 4/3*np.pi*(ROI_radius ** 3)*10**9;
-post_therapy_end = 2000;
+post_therapy_end = 500;
 #mu_start = 0.0143;
-ss = [6];#[3,5,10,11];#np.arange(12).tolist();#np.arange(12).tolist();#[6];#[4,8,9,5,10,11];
+ss = [0];#[3,5,10,11];#np.arange(12).tolist();#np.arange(12).tolist();#[6];#[4,8,9,5,10,11];
 #[0,1,3,4,8,9,5,10,11];#[4,8,9,5,10,11];[0,1,2,3,6,7]
 z = 1; n = 1;
 l_vec =  [0,  0, l_w, l_s, l_w , l_s , 0 ,0 ,l_w,l_w,l_s,l_s];
