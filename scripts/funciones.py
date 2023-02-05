@@ -15,10 +15,10 @@ def dU_dt_old(U,t, r1, r2, d, p, h1, h2, hd, z, l, n, sig, mu_bar, rho, xi1, xi2
                     ])
     # make simulations, argue from equations
 
-def dU_dt(U,t, r1, r2, d, p, h1, h2, hd, z, l, n, sig, mu_bar, rho, xi1, xi2, ddd, xi3, dsc):
+def dU_dt(U,t, r1, r2, d, p, h1, h2, hd, z, l, n, sig, mu_bar, rho, xi1, xi2, ddd, xi3, dsc, hU):
     #function dU = stem_ODE_feedback(t, U, r1, r2, d, p, h, hd, z, l, n, sig, mu_bar, chi)
-    dudt=(2*p/(1+l*U[1]**n)-1)*r1/(1+h1*U[1]**n)*U[0] + rho* xi1*ddd/(1+xi1*ddd) *U[2] * U[1] - dsc * U[0];# 
-    dvdt=2*(1-p/(1+l*U[1]**n))*r1/(1+h1*U[1]**n)*U[0] + U[1] * (r2/(1+h2*U[1]**n) * xi3*U[0]/(1+xi3*U[0]) - d-(1.1*r2-d)*hd*U[1]**n/(1+hd*U[1]**n) -rho * xi1*ddd/(1+xi1*ddd) * U[2])
+    dudt=(2*p/(1+l*U[1]**n)-1)*r1/(1+h1*U[1]**n)*U[0]/(1+hU*U[0]) + rho *U[2] * U[1] - dsc * U[0];# * xi1*ddd/(1+xi1*ddd)
+    dvdt=2*(1-p/(1+l*U[1]**n))*r1/(1+h1*U[1]**n)*U[0]/(1+hU*U[0]) + U[1] * (r2/(1+h2*U[1]**n) * xi3*U[0]/(1+xi3*U[0]) - d-(1.1*r2-d)*hd*U[1]**n/(1+hd*U[1]**n)-rho* U[2]);#* xi1*ddd/(1+xi1*ddd) 
     dmudt=sig * (1/(1+xi2*ddd))* (mu_bar - U[2]);# 
     return np.array([dudt, #- 0*(d+(1.1*r2-d)*hd*U[1]**n/(1+hd*U[1]**n)) * U[0], 
                      dvdt,
@@ -58,10 +58,10 @@ def radiotherapy(U, LQ_para, surv_vec):
     #radiotherapy_mkiii
     u, v, mu = U[:,-1];
     [a1, b1, a2, b2, c, D] = LQ_para;
-    [cont_p_a, cont_p_b, compt_mult, srvn_csc, srvn_dcc, cont_c, useMuQ] = surv_vec;
-    SF_U =  np.exp(-a1*D-b1*D**2);
-    SF_V = np.exp(-a2*D-b2*D**2);
-    mu_new = (mu +c * D)* useMuQ;  # 2 Nov 2021: added "+ .01428"  #21 Oct 2022: removed "+ .01428"
+    [cont_p_a, cont_p_b, compt_mult, srvn_csc, srvn_dcc, cont_c, useMuQ, eff] = surv_vec;
+    SF_U =  eff*np.exp(-a1*D-b1*D**2);
+    SF_V = eff*np.exp(-a2*D-b2*D**2);
+    mu_new = (c * D)* useMuQ;  # 2 Nov 2021: added "+ .01428"  #21 Oct 2022: removed "+ .01428"
     v_new = max(0,(1 - min(1,mu_new))*SF_V*v);
     u_new = u*SF_U + min(1,mu_new)*SF_V*v;
     return [u_new,v_new, mu_new,SF_U, SF_V]
@@ -181,7 +181,7 @@ def parameter_setup(switch_vec, misc_pars):
         # Doses = [1, 2, 40/15, 34/10, 5]; # dose fraction sizes in Gy
         # Frac = [60, 30, 15 ,10, 5]; 
         #Doses = np.arange(1,11).tolist();#, 34/10, 5]; # dose fraction sizes in Gy
-        Doses = np.arange(2,22,2,dtype=float);#sorted(np.arange(1,21,dtype=float).tolist() + [40/15,34/10]);
+        Doses = np.arange(1,22,dtype=float);#np.arange(2,22,2,dtype=float);#sorted(np.arange(1,21,dtype=float).tolist() + [40/15,34/10]);
         Frac = list(map(lambda d: float(np.floor(calc_BED_Frac(.17,.02,d))),Doses)); # 25*(1+(5)/8.5)
         # Doses = [2.0,2.0];#np.sort(np.append(np.arange(1,21),[40/15,34/10])).tolist(); # dose fraction sizes in Gy
         # Frac = [30.0,31.0];#list(map(lambda d:calc_BED_Frac(a,b,d),Doses));#,baseline_BED=25*(1+5/8.5)

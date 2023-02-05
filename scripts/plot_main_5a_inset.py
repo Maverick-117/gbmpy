@@ -44,12 +44,12 @@ def calc_eigs6(U,V):
     return [eig1, eig2];
 
 font = {'weight' : 'bold',
-        'size'   : 13}
+        'size'   : 100}
 
-BASE_SIZE = 11;
-SMALL_SIZE = 1.5 * BASE_SIZE;
-MEDIUM_SIZE = 2 * BASE_SIZE;
-LARGE_SIZE = 2.5 * BASE_SIZE;
+BASE_SIZE = 15;
+SMALL_SIZE = 1.25 * BASE_SIZE;
+MEDIUM_SIZE = 1.5 * BASE_SIZE;
+LARGE_SIZE = 1.75 * BASE_SIZE;
 
 mpl.rc('font', size=BASE_SIZE)          # controls default text sizes
 mpl.rc('axes', titlesize=LARGE_SIZE)     # fontsize of the axes title
@@ -73,7 +73,7 @@ h1a = 0;
 saveQ = False;
 cases = ["2 Gy", "2.67 Gy" , "3.4 Gy", "5 Gy"]; 
 comp_str = "Gy";
-Doses = [2.0,2.0];
+Doses = [12.0,12.0];
 Fracs = [calc_BED_Frac(.17,.02,Doses[0]),calc_BED_Frac(.17,.02,Doses[1])]#list(map(lambda d:calc_BED_Frac(a,b,d,40*(1+(3.4)/8.5)),Doses));#;[25,20]
 EOTs  = [calc_EOT(Fracs[0],100), calc_EOT(Fracs[1],100)];
 EOT_diff = EOTs[0] - EOTs[1];
@@ -92,7 +92,7 @@ T_stop = 2000;
 step = 1;
 
 # ss
-load_temp = [3,5,10,11];#np.arange(12).tolist();#[1,3,5,6,7,10,11];#np.arange(12).tolist();
+load_temp = [6];#np.arange(12).tolist();#[1,3,5,6,7,10,11];#np.arange(12).tolist();
 deathFdbkQ = True;
 death_r2_mult = 1.1;
 log_yscaleQ = True;
@@ -145,7 +145,7 @@ if use_muQ:
     s_xi3_vec = ['\\' + str(els) for els in xi3_vec];
     s_sig_vec = ['\\' + str(el) for el in sig_vec];
     s_rho_vec = ['\\' + str(elb) + '\\' for elb in rho_vec];
-    case = 'reversal\\21_Oct';#'mathCheck\\2_Feb'#'reversionAttempt4\\14_Nov';#'muNN-l2b\\2_Nov';#'baseline\\31_Oct';
+    case = 'dynReprogMin\\24_Jan';#'hU\\6_Jan';#'reversal\\21_Oct';#'mathCheck\\2_Feb'#'reversionAttempt4\\14_Nov';#'muNN-l2b\\2_Nov';#'baseline\\31_Oct';
 else:
     sig_vec=[0];
     s_sig_vec = ['\\0\\'];
@@ -158,7 +158,7 @@ else:
 # Nsched_vec = [0,1];
 Nsched_vec_str = ['',' (delayed)']
 
-goldenLaptopQ = True;
+goldenLaptopQ = False;
 
 if goldenLaptopQ:
     prefix = "C:\\Users\\jhvo9\\Google Drive (vojh1@uci.edu)";
