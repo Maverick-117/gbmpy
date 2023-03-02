@@ -73,7 +73,7 @@ h1a = 0;
 saveQ = False;
 cases = ["2 Gy", "2.67 Gy" , "3.4 Gy", "5 Gy"]; 
 comp_str = "Gy";
-Doses = [12.0,12.0];
+Doses = [2.0,2.0];
 Fracs = [calc_BED_Frac(.17,.02,Doses[0]),calc_BED_Frac(.17,.02,Doses[1])]#list(map(lambda d:calc_BED_Frac(a,b,d,40*(1+(3.4)/8.5)),Doses));#;[25,20]
 EOTs  = [calc_EOT(Fracs[0],100), calc_EOT(Fracs[1],100)];
 EOT_diff = EOTs[0] - EOTs[1];
@@ -87,7 +87,7 @@ comp_dir = str(C[0])+"_reprog";
 fix_str= str(Doses[-1])+"Gy"
 comp_list = C;
 unit = ' Gy';
-T_stop = 2000;
+T_stop = 1000;
 #lll_load = 6;
 step = 1;
 
@@ -109,7 +109,11 @@ if deathFdbkQ:
 else:
     hd = 0.0;#1e5; 
     deathFdbk_str = "_w_no_death_fdbk";
-sub_drty = "\\corrected_reprog";
+kimReprogQ = False;
+if kimReprogQ:
+    sub_drty = "kim_reprog";
+else:
+    sub_drty = "\\corrected_reprog";
 deathVal_dir = '\\death_val_of_kim';
 color = ['r','k','g','b','m'];
 
@@ -134,18 +138,18 @@ if use_muQ:
     #, 1e3,np.infty]
     # sig_vec = [10];#list(map(lambda p: 1 * 10 ** (p), np.arange(0,3).tolist()));
     # rho_vec = [0];#[1/5];#sorted(list(map(lambda p: 2 ** (p), np.arange(0,-5,-1).tolist())) + [1/5]);
-    sig_vec = [0.1];#sorted(list(map(lambda p:  10 ** (p), np.arange(-1,3).tolist()))+[0]);
+    sig_vec = [3/144];#sorted(list(map(lambda p:  10 ** (p), np.arange(-1,3).tolist()))+[0]);
     rho_vec = [0.2];#0.2
 # rename rho to rho
-    xi1_vec = [0.01];#[0.01];#sorted(list(map(lambda p:  10 ** (p), np.arange(-1,3).tolist()))+[0]);
-    xi2_vec = [1];#[1];#sorted(list(map(lambda p:  10 ** (p), np.arange(-1,3).tolist()))+[0]);#np.arange(0.01,0.1,0.01);#[.1];#sorted(list(map(lambda p:  10 ** (p), np.arange(0,3).tolist()))+[0])
+    xi1_vec = [1e1];#[0.01];#sorted(list(map(lambda p:  10 ** (p), np.arange(-1,3).tolist()))+[0]);
+    xi2_vec = [0.1];#[1];#sorted(list(map(lambda p:  10 ** (p), np.arange(-1,3).tolist()))+[0]);#np.arange(0.01,0.1,0.01);#[.1];#sorted(list(map(lambda p:  10 ** (p), np.arange(0,3).tolist()))+[0])
     xi3_vec = [1e9];
     s_xi1_vec = ['\\' + str(el) for el in xi1_vec];
     s_xi2_vec = ['\\' + str(elb) for elb in xi2_vec];
     s_xi3_vec = ['\\' + str(els) for els in xi3_vec];
     s_sig_vec = ['\\' + str(el) for el in sig_vec];
     s_rho_vec = ['\\' + str(elb) + '\\' for elb in rho_vec];
-    case = 'dynReprogMin\\24_Jan';#'hU\\6_Jan';#'reversal\\21_Oct';#'mathCheck\\2_Feb'#'reversionAttempt4\\14_Nov';#'muNN-l2b\\2_Nov';#'baseline\\31_Oct';
+    case = 'test\\28_Feb';#'hU\\6_Jan';#'reversal\\21_Oct';#'mathCheck\\2_Feb'#'reversionAttempt4\\14_Nov';#'muNN-l2b\\2_Nov';#'baseline\\31_Oct';
 else:
     sig_vec=[0];
     s_sig_vec = ['\\0\\'];
@@ -158,7 +162,7 @@ else:
 # Nsched_vec = [0,1];
 Nsched_vec_str = ['',' (delayed)']
 
-goldenLaptopQ = False;
+goldenLaptopQ = True;
 
 if goldenLaptopQ:
     prefix = "C:\\Users\\jhvo9\\Google Drive (vojh1@uci.edu)";
@@ -166,8 +170,8 @@ else:
     prefix = "G:\\My Drive";
 
 base_dir = prefix+"\\a PhD Projects\\GBM Modeling\\python scripts\\data\\k2_model\\"
-base_dir1 = base_dir+"conventional_BED\\"+case+"\\death_val_of_kim\\corrected_reprog";#"conventional_BED\\srv_test\\16_Oct\\death_val_of_kim\\corrected_reprog";
-base_dir2 = base_dir+"fixed_BED\\40\\03_Aug\\death_val_of_kim\\corrected_reprog"
+base_dir1 = base_dir+"conventional_BED\\"+case+"\\death_val_of_kim\\"+sub_drty;#"conventional_BED\\srv_test\\16_Oct\\death_val_of_kim\\corrected_reprog";
+base_dir2 = base_dir+"fixed_BED\\40\\03_Aug\\death_val_of_kim\\"+sub_drty;
 
 save_dir = "G:\My Drive\a PhD Projects\GBM Modeling\python scripts\plots\k2_model\long term steady state sims\12000 days\death feedback"
 
@@ -676,7 +680,7 @@ if compBaselineQ:
     s_fr_1 = '_'+str(Fracs[1])+'_Fracs_';#'_'+str(Fracs[1])+'_Fracs_';
     base_dir = prefix+"\\a PhD Projects\\GBM Modeling\\python scripts\\data\\k2_model\\"
     caseC = "baseline_beta\\5_Nov"
-    base_dirC = base_dir+"conventional_BED\\"+caseC+"\\death_val_of_kim\\corrected_reprog";
+    base_dirC = base_dir+"conventional_BED\\"+caseC+"\\death_val_of_kim\\"+sub_drty;
     data2C = np.ones((len(rho_vec),len(sig_vec),12)).tolist();
     data1C = np.ones((len(rho_vec),len(sig_vec),12)).tolist();
     dataNC = np.ones((len(rho_vec),len(sig_vec),12)).tolist();

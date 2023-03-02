@@ -19,13 +19,13 @@ kimICQ = True; # true: use kim's IC; false: use Yu's IC
 c_dep_sQ = False; # true: make c in radiotherapy dependent on s; false: don't do that
 kimReprogQ = False; 
 kimDeathValQ = True; # true: sets death value to what Kim used; false: sets death value equal to 
-    
+kimDynamQ = False;
 model0Q = True; # true: using vo's no-survivin model and equations; false: not using it 
 model1Q = False; # true: using vo's survivin-protects model and equations; false: not using it
 model2Q = False; # true: using vo's survivin-protects-dedifferentiates model and equations; false: not using it
 
 ### VARS RELATED TO EXPERIMENTAL QUESTS ###
-goldenLaptopQ = False;
+goldenLaptopQ = True;
 schedChangeQ = False;
 
 deathFdbkQ = True; # false: set death feedback gain to 0; true: don't use the false option
@@ -41,7 +41,7 @@ F = 0.016
 #sig =  1e10;
 DT =  3.9; # doubling time in days in order labeled by varible "cell_lines"
 treat_start = 100; # treatment start time relative to start of simulation
-acq_days_after_RT = 110; # simulation length after last fraction
+acq_days_after_RT = 0; # simulation length after last fraction
 
 # DE parameters
 eff = 1.0;
@@ -57,9 +57,9 @@ pwr = 3;#Inf;
 ROI_radius = 1; # Radius of the simulation region of intrest
 #rho = 10**9; # density of cells in the region of interest (cells/cm^3)
 total_cell_num = 4/3*np.pi*(ROI_radius ** 3)*10**9;
-post_therapy_end = 500;
+post_therapy_end = 1000;
 #mu_start = 0.0143;
-ss = [0];#[3,5,10,11];#np.arange(12).tolist();#np.arange(12).tolist();#[6];#[4,8,9,5,10,11];
+ss = [6];#[3,5,10,11];#np.arange(12).tolist();#np.arange(12).tolist();#[6];#[4,8,9,5,10,11];
 #[0,1,3,4,8,9,5,10,11];#[4,8,9,5,10,11];[0,1,2,3,6,7]
 z = 1; n = 1;
 l_vec =  [0,  0, l_w, l_s, l_w , l_s , 0 ,0 ,l_w,l_w,l_s,l_s];
@@ -81,14 +81,14 @@ cont_p_b = 10*cont_p_a; compt_mult = 100; # control the strength of inhibitory s
 srvn_zeta = [3.6, 0.05]; # defunct
 srvn_csc = srvn_zeta[0]; srvn_dcc = srvn_zeta[1]; # defunct
 if use_muQ:
-    sig_list = [0.1];#[0.1];#sorted(list(map(lambda p:  10 ** (p), np.arange(-1,3).tolist()))+[0]);
+    sig_list = [3/144];#[0.1];#sorted(list(map(lambda p:  10 ** (p), np.arange(-1,3).tolist()))+[0]);
     rho_list = [0.2];#0.2
 # rename rho to rho
-    xi1_list = [0.01];#[0.01];#sorted(list(map(lambda p:  10 ** (p), np.arange(-1,3).tolist()))+[0]);
-    xi2_list = [1];#[1];#sorted(list(map(lambda p:  10 ** (p), np.arange(-1,3).tolist()))+[0]);##[.1];#sorted(list(map(lambda p:  10 ** (p), np.arange(0,3).tolist()))+[0])
+    xi1_list = [0.5];#[0.01];#sorted(list(map(lambda p:  10 ** (p), np.arange(-1,3).tolist()))+[0]);
+    xi2_list = [0.1];#[1];#sorted(list(map(lambda p:  10 ** (p), np.arange(-1,3).tolist()))+[0]);##[.1];#sorted(list(map(lambda p:  10 ** (p), np.arange(0,3).tolist()))+[0])
     xi3_list = [1e9];
 else:
-    sig_list = [6];
+    sig_list = [3/144];
 
 if schedChangeQ:
     Nsched_list = [1];
@@ -167,10 +167,10 @@ reversionAttempt6a (debug0) := no xi1's in the numerator
 debug2 := xi1 in dU/dt and dV/dt's numerator
 feedbackCheck := trying different kinds of feedback for the V-only feedback regimes. also tried a 1000000 day run
 '''
-day_month = "24_Jan"; #6_Jan has some interesting stuff,
+day_month = "28_Feb"; #6_Jan has some interesting stuff,
 base_model_name = 'k2_model' # note: all the rho-sig sims should really fall into a model folder...
 model_suffix = "conventional_BED\\"#"comparing_conventionals\\";
-case = "dynReprogMin";#finalRunCvary for varying C. doseCheckRho means that the rho is constant. 
+case = "test";#finalRunCvary for varying C. doseCheckRho means that the rho is constant. 
 if goldenLaptopQ:
     base_dirGD = 'C:\\Users\\jhvo9\\Google Drive (vojh1@uci.edu)';#"/DFS-L/DATA/lowengrub/vojh1";#"C:\\Users\\jhvo9\\Google Drive (vojh1@uci.edu)"
 else:
@@ -289,7 +289,7 @@ for lll in rng:
                                             treat_days = np.array(treat_days.tolist() + [acq_end]);  
                                             LQ_param = [a1, b1, a2, b2, c, D];
                                             surv_vec = [cont_p_a, cont_p_b, compt_mult, srvn_csc, srvn_dcc, cont_c, useMuQ, eff]; #assuming these control parameters are constant                                        
-                                            sim_values = [model0Q, model1Q, model2Q, kimReprogQ, total_cell_num, treat_days, mu_start, LQ_param, total_start_frac, sc_start, sim_resume_days, surv_vec, time_pts1, time_pts2];
+                                            sim_values = [model0Q, model1Q, model2Q, kimReprogQ, total_cell_num, treat_days, mu_start, LQ_param, total_start_frac, sc_start, sim_resume_days, surv_vec, time_pts1, time_pts2, kimDynamQ];
                                             para_values = (r1, r2, d, p, h1, h2, hd, z, l, n, sig, mu_bar, rho, xi1, xi2, D, xi3, dsc, hU);
                                             
                                             U, T, U_none, T_none = funciones.dynamics(para_values,sim_values);

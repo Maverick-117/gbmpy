@@ -7,6 +7,12 @@ Created on Wed Dec  8 18:56:28 2021
 import numpy as np
 import scipy.integrate as integrate
 
+def dU_dt_kim(U,t, r1, r2, d, p, h1, h2, hd, z, l, n, sig, mu_bar, rho, xi1, xi2, ddd, xi3, dsc, hU):
+    return np.array([(2*p/(1+l*U[1]**n)-1)*r1/(1+h1*U[1]**n)*U[0], # stem cell
+                     2*(1-p/(1+l*U[1]**n))*r1/(1+h1*U[1]**n)*U[0]+r2/(1+h2*U[1]**z)*U[1]-d*U[1],
+                     0]); #differentiated cell
+
+
 def dU_dt_old(U,t, r1, r2, d, p, h1, h2, hd, z, l, n, sig, mu_bar, rho, xi1, xi2, ddd):
     #function dU = stem_ODE_feedback(t, U, r1, r2, d, p, h, hd, z, l, n, sig, mu_bar, chi)
     return np.array([(2*p/(1+l*U[1]**n)-1)*r1/(1+h1*U[1]**n)*U[0] + rho * xi1*ddd/(1+xi1*ddd) * U[2] * U[1], #- 0*(d+(1.1*r2-d)*hd*U[1]**n/(1+hd*U[1]**n)) * U[0], 
@@ -15,10 +21,10 @@ def dU_dt_old(U,t, r1, r2, d, p, h1, h2, hd, z, l, n, sig, mu_bar, rho, xi1, xi2
                     ])
     # make simulations, argue from equations
 
-def dU_dt(U,t, r1, r2, d, p, h1, h2, hd, z, l, n, sig, mu_bar, rho, xi1, xi2, ddd, xi3, dsc, hU):
+def dU_dt_less_old(U,t, r1, r2, d, p, h1, h2, hd, z, l, n, sig, mu_bar, rho, xi1, xi2, ddd, xi3, dsc, hU):
     #function dU = stem_ODE_feedback(t, U, r1, r2, d, p, h, hd, z, l, n, sig, mu_bar, chi)
-    dudt=(2*p/(1+l*U[1]**n)-1)*r1/(1+h1*U[1]**n)*U[0]/(1+hU*U[0]) + rho *U[2] * U[1] - dsc * U[0];# * xi1*ddd/(1+xi1*ddd)
-    dvdt=2*(1-p/(1+l*U[1]**n))*r1/(1+h1*U[1]**n)*U[0]/(1+hU*U[0]) + U[1] * (r2/(1+h2*U[1]**n) * xi3*U[0]/(1+xi3*U[0]) - d-(1.1*r2-d)*hd*U[1]**n/(1+hd*U[1]**n)-rho* U[2]);#* xi1*ddd/(1+xi1*ddd) 
+    dudt=(2*p/(1+l*U[1]**n)-1)*r1/(1+h1*U[1]**n)*U[0]/(1+hU*U[0]) + rho* xi1*ddd/(1+xi1*ddd) *U[2] * U[1] - dsc * U[0];# 
+    dvdt=2*(1-p/(1+l*U[1]**n))*r1/(1+h1*U[1]**n)*U[0]/(1+hU*U[0]) + U[1] * (r2/(1+h2*U[1]**n) * xi3*U[0]/(1+xi3*U[0]) - d-(1.1*r2-d)*hd*U[1]**n/(1+hd*U[1]**n)-rho* U[2]* xi1*ddd/(1+xi1*ddd) );#
     dmudt=sig * (1/(1+xi2*ddd))* (mu_bar - U[2]);# 
     return np.array([dudt, #- 0*(d+(1.1*r2-d)*hd*U[1]**n/(1+hd*U[1]**n)) * U[0], 
                      dvdt,
@@ -26,6 +32,15 @@ def dU_dt(U,t, r1, r2, d, p, h1, h2, hd, z, l, n, sig, mu_bar, rho, xi1, xi2, dd
                     ])
     # make simulations, argue from equations
 
+def dU_dt(U,t, r1, r2, d, p, h1, h2, hd, z, l, n, sig, mu_bar, rho, xi1, xi2, ddd, xi3, dsc, hU):
+    #function dU = stem_ODE_feedback(t, U, r1, r2, d, p, h, hd, z, l, n, sig, mu_bar, chi)
+    dudt=(2*p/(1+l*U[1]**n)-1)*r1/(1+h1*U[1]**n)*U[0]/(1+hU*U[0]) + rho* xi1*U[2]/(1+xi1*U[2])  * U[1] - dsc * U[0];# 
+    dvdt=2*(1-p/(1+l*U[1]**n))*r1/(1+h1*U[1]**n)*U[0]/(1+hU*U[0]) + U[1] * (r2/(1+h2*U[1]**n) * xi3*U[0]/(1+xi3*U[0]) - d-(1.1*r2-d)*hd*U[1]**n/(1+hd*U[1]**n)-rho* U[2]* xi1/(1+xi1*U[2]) );#
+    dmudt=sig * (mu_bar - U[2]);# * (1/(1+xi2*ddd))
+    return np.array([dudt, #- 0*(d+(1.1*r2-d)*hd*U[1]**n/(1+hd*U[1]**n)) * U[0], 
+                     dvdt,
+                     dmudt #
+                    ])
 def calc_BED_Frac(a,b,Dose,baseline_BED=60*(1+2/8.5)):
     # a = .17, b =.02
     # the baseline BED is set to conventional dosage, by default
@@ -34,7 +49,7 @@ def calc_BED_Frac(a,b,Dose,baseline_BED=60*(1+2/8.5)):
     else:
         return 0;
 
-def radiotherapy_kim(U, LQ_para, surv_vec):
+def radiotherapy_ol(U, LQ_para, surv_vec):
     def fdbk(control, surv):
         val = 1/(1+control*surv);
         return val
@@ -42,7 +57,7 @@ def radiotherapy_kim(U, LQ_para, surv_vec):
     #   Detailed explanation goes here
     u, v, s = U[:,-1];
     [a1, b1, a2, b2, c, D] = LQ_para;
-    [cont_p_a, cont_p_b, compt_mult, srvn_csc, srvn_dcc, cont_c] = surv_vec;
+    [cont_p_a, cont_p_b, compt_mult, srvn_csc, srvn_dcc, cont_c, useMuQ, eff] = surv_vec;
     # compt_mult tunes fold-change of stem cell feedback ratio based on diff.
     # cell feedback ratio
     SF_U =  np.exp(-a1*fdbk(cont_p_a*compt_mult, s)*D-b1*fdbk(cont_p_b*compt_mult, s)*D**2);
@@ -50,7 +65,24 @@ def radiotherapy_kim(U, LQ_para, surv_vec):
     u_new = u*SF_U + c*D*v;
     v_new = (v*SF_V - c*D*v); # apply RT; assumes death occurs on non-reprogrammed cells. is this biologically valid?
     # max(v*exp(-a2*D-b2*D^2) - c*v*D,0)
-    s_new = s + srvn_csc * (u-u*SF_U) + srvn_dcc * (v-v_new); 
+    s_new = 0;#s + srvn_csc * (u-u*SF_U) + srvn_dcc * (v-v_new); 
+    # v_new is used instead of SF_U because radiotherapy causes de-dif
+    return [u_new,v_new, s_new,SF_U, SF_V]
+
+def radiotherapy_kim(U, LQ_para, surv_vec):
+    #UNTITLED2 Summary of this function goes here
+    #   Detailed explanation goes here
+    u, v, s = U[:,-1];
+    [a1, b1, a2, b2, c, D] = LQ_para;
+    [cont_p_a, cont_p_b, compt_mult, srvn_csc, srvn_dcc, cont_c, useMuQ, eff] = surv_vec;
+    # compt_mult tunes fold-change of stem cell feedback ratio based on diff.
+    # cell feedback ratio
+    SF_U =  np.exp(-a1*D-b1*D**2);
+    SF_V = np.exp(-a2*D-b2*D**2);
+    u_new = u*SF_U + c*D*v*useMuQ;
+    v_new = (v*SF_V - c*D*v*useMuQ); # apply RT; assumes death occurs on non-reprogrammed cells. is this biologically valid?
+    # max(v*exp(-a2*D-b2*D^2) - c*v*D,0)
+    s_new = 0;#s + srvn_csc * (u-u*SF_U) + srvn_dcc * (v-v_new); 
     # v_new is used instead of SF_U because radiotherapy causes de-dif
     return [u_new,v_new, s_new,SF_U, SF_V]
 
@@ -81,7 +113,7 @@ def radiotherapy_mu0(U, LQ_para, surv_vec):
 
 def dynamics(para_values, sim_values):
     # dynamics_mkiii
-    model0Q, model1Q, model2Q, kimReprogQ, total_cell_num, treat_days, mu_start, LQ_param, total_start_frac, sc_start, sim_resume_days, surv_vec, time_pts1, time_pts2 = sim_values;
+    model0Q, model1Q, model2Q, kimReprogQ, total_cell_num, treat_days, mu_start, LQ_param, total_start_frac, sc_start, sim_resume_days, surv_vec, time_pts1, time_pts2, kimDynamQ = sim_values;
     #r1, r2, d, p, h1, h2, hd, z, l, n, sig, mu_bar, beta, xi1, xi2, ddd, xi3 = para_values;
     tc_start = total_start_frac-sc_start;
     # ODE simulation before first fraction of RT
@@ -89,8 +121,10 @@ def dynamics(para_values, sim_values):
     U0 = [sc_start, tc_start, mu_start]; 
     T = np.linspace(0, treat_days[0], time_pts1);
     #print("initial growth evaluated")
-    U = integrate.odeint(dU_dt, U0, T, args=para_values).T
-
+    if not kimDynamQ:
+        U = integrate.odeint(dU_dt, U0, T, rtol=1e-10, atol=1e-10, args=para_values).T
+    else:
+        U = integrate.odeint(dU_dt_kim, U0, T, rtol=1e-10, atol=1e-10, args=para_values).T
     
     ## pre-therapy growth dynamics and plotting
 
@@ -108,15 +142,21 @@ def dynamics(para_values, sim_values):
         T_int = np.linspace(sim_resume_days[i], treat_days[i+1],int(np.round(time_pts2*(-sim_resume_days[i] + treat_days[i+1]))));
         U0_int = [u_new, v_new, mu_new];
 
-        U_new = integrate.odeint(dU_dt, np.array(U0_int).reshape((3,)), T_int, args=para_values).T
-
+        
+        if not kimDynamQ:
+            U_new = integrate.odeint(dU_dt, np.array(U0_int).reshape((3,)), T_int, rtol=1e-10, atol=1e-10, args=para_values).T
+        else:
+            U_new = integrate.odeint(dU_dt_kim, np.array(U0_int).reshape((3,)), T_int, rtol=1e-10, atol=1e-10, args=para_values).T
         U = np.hstack((U, U_new))
             
         T = np.concatenate((T, T_int))
 
     #print("done")
-    T_none = np.linspace(0, treat_days[-1],10*time_pts2)
-    U_none = integrate.odeint(dU_dt, U0, T_none, args=para_values).T
+    T_none = T;#np.linspace(0, treat_days[-1],1000*time_pts2)
+    if not kimDynamQ:
+        U_none = integrate.odeint(dU_dt, U0, T_none, rtol=1e-10, atol=1e-10, args=para_values).T
+    else:
+        U_none = integrate.odeint(dU_dt_kim, U0, T_none, rtol=1e-10, atol=1e-10, args=para_values).T
     
     return U, T, U_none, T_none
 
@@ -181,7 +221,7 @@ def parameter_setup(switch_vec, misc_pars):
         # Doses = [1, 2, 40/15, 34/10, 5]; # dose fraction sizes in Gy
         # Frac = [60, 30, 15 ,10, 5]; 
         #Doses = np.arange(1,11).tolist();#, 34/10, 5]; # dose fraction sizes in Gy
-        Doses = np.arange(1,22,dtype=float);#np.arange(2,22,2,dtype=float);#sorted(np.arange(1,21,dtype=float).tolist() + [40/15,34/10]);
+        Doses = np.arange(1,12,dtype=float);#np.arange(2,22,2,dtype=float);#sorted(np.arange(1,21,dtype=float).tolist() + [40/15,34/10]);
         Frac = list(map(lambda d: float(np.floor(calc_BED_Frac(.17,.02,d))),Doses)); # 25*(1+(5)/8.5)
         # Doses = [2.0,2.0];#np.sort(np.append(np.arange(1,21),[40/15,34/10])).tolist(); # dose fraction sizes in Gy
         # Frac = [30.0,31.0];#list(map(lambda d:calc_BED_Frac(a,b,d),Doses));#,baseline_BED=25*(1+5/8.5)

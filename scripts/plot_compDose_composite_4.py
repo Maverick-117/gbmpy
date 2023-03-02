@@ -38,7 +38,7 @@ font = {'weight' : 'bold',
 matplotlib.rc('font', **font)
 
 total_cell_num = 4/3*np.pi*(1 ** 3)*1e9;
-goldenLaptopQ = False;
+goldenLaptopQ = True;
 compDosesQ = True; #true: yes you're comparing doses; false: no, you're comparing reprogramming versus non-reprogramming
 saveQ = False;
 log_yscaleQ = True;
@@ -80,7 +80,7 @@ comp_conventional_60_30Q = True;
 base_model_name = 'k2_model'
 #case = "34";
 model_suffix = "conventional_BED"#
-date_data_dir = '24_Jan\\'
+date_data_dir = '28_Feb\\'
 date_plot_dir = '28_Mar\\'; 
 # 11_Dec, T_stop = 1200 and add some post-EOT times to see the minor but clear evidence that post-1 year dynamics aren't flat
 if kimDeathValQ:
@@ -102,17 +102,17 @@ FracsEmp = [60,30,15   ,10   ,5];
 TotalDoseEmp = [int(DosesEmp[i]*FracsEmp[i]) for i in range(len(DosesEmp))];
 BEDEmp = [TotalDoseEmp[i] * (1+DosesEmp[i]/8.5) for i in range(len(DosesEmp))];
 base_idxs = list(range(1,len(DosesEmp)));
-sig_list = [0.1];#sorted(list(map(lambda p:  10 ** (p), np.arange(-1,3).tolist()))+[0]);
+sig_list = [3/144];#sorted(list(map(lambda p:  10 ** (p), np.arange(-1,3).tolist()))+[0]);
 rho_list = [0.2];#sorted(list(map(lambda p: 2 ** (p), np.arange(0,-3,-1).tolist())) + [0,2]);
 # rename rho to rho
-xi1_list = [0.01];#sorted(list(map(lambda p:  10 ** (p), np.arange(-1,3).tolist()))+[0]);
-xi2_list = [1];#sorted(list(map(lambda p:  10 ** (p), np.arange(-1,3).tolist()))+[0]);#np.arange(0.01,0.1,0.01);#[.1];#sorted(list(map(lambda p:  10 ** (p), np.arange(0,3).tolist()))+[0])
+xi1_list = [0.5];#sorted(list(map(lambda p:  10 ** (p), np.arange(-1,3).tolist()))+[0]);
+xi2_list = [0.1];#sorted(list(map(lambda p:  10 ** (p), np.arange(-1,3).tolist()))+[0]);#np.arange(0.01,0.1,0.01);#[.1];#sorted(list(map(lambda p:  10 ** (p), np.arange(0,3).tolist()))+[0])
 xi3_list = [1e9];
 days_past_treatment = [30,90,180,360,720];
 pick_idx = [1];
-T_stop = 2000;#int(t_vec.max());
+T_stop = 1000;#int(t_vec.max());
 
-Doses =[1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,10.0,12.0,14.0,16.0,18.0,20.0];#sorted(np.arange(1,21,dtype=float).tolist() + DosesEmp[2:5]);
+Doses =[1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0,10.0,11.0];#,14.0,16.0,18.0,20.0];#sorted(np.arange(1,21,dtype=float).tolist() + DosesEmp[2:5]);
 
 #collect time points in the space of parameters we're working with
 #results_mtx = np.ones((4,len(Doses),len(days_past_treatment),4)); # BED x Doses x DPT x cell-types
@@ -139,7 +139,7 @@ for p,ref_idx in enumerate(pick_idx): # per BED (p)
     elif ref_idx in [0,4]:
         # case = str(TotalDoseEmp[ref_idx]);
         case_str = str(DosesEmp[ref_idx])+" Gy";
-    case = 'dynReprogMin'
+    case = 'test'
     # case_str = "conventional";
     C = [ 5.196*10**(-3), 5.196*10**(-3)];
     fix_str = str(C[0])+"_reprog";
