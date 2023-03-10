@@ -28,7 +28,7 @@ model2Q = False; # true: using vo's survivin-protects-dedifferentiates model and
 goldenLaptopQ = True;
 schedChangeQ = False;
 
-deathFdbkQ = True; # false: set death feedback gain to 0; true: don't use the false option
+deathFdbkQ = False; # false: set death feedback gain to 0; true: don't use the false option
 #useMuQ = True;
 
 # Radiotherapy model
@@ -45,7 +45,7 @@ acq_days_after_RT = 0; # simulation length after last fraction
 
 # DE parameters
 eff = 1.0;
-hU = 10 ** (-1);
+hU = 0;
 r1 = np.log(2)/DT; # growth rate of CSC
 r2 = np.log(2)/DT; # growth rate of DCC
 p = .505; # self renewal probability 
@@ -59,7 +59,7 @@ ROI_radius = 1; # Radius of the simulation region of intrest
 total_cell_num = 4/3*np.pi*(ROI_radius ** 3)*10**9;
 post_therapy_end = 1000;
 #mu_start = 0.0143;
-ss = [6];#[3,5,10,11];#np.arange(12).tolist();#np.arange(12).tolist();#[6];#[4,8,9,5,10,11];
+ss = [4];#[3,5,10,11];#np.arange(12).tolist();#np.arange(12).tolist();#[6];#[4,8,9,5,10,11];
 #[0,1,3,4,8,9,5,10,11];#[4,8,9,5,10,11];[0,1,2,3,6,7]
 z = 1; n = 1;
 l_vec =  [0,  0, l_w, l_s, l_w , l_s , 0 ,0 ,l_w,l_w,l_s,l_s];
@@ -81,10 +81,10 @@ cont_p_b = 10*cont_p_a; compt_mult = 100; # control the strength of inhibitory s
 srvn_zeta = [3.6, 0.05]; # defunct
 srvn_csc = srvn_zeta[0]; srvn_dcc = srvn_zeta[1]; # defunct
 if use_muQ:
-    sig_list = [3/144];#[0.1];#sorted(list(map(lambda p:  10 ** (p), np.arange(-1,3).tolist()))+[0]);
-    rho_list = [0.2];#0.2
+    sig_list = [144/3];#[0.1];#sorted(list(map(lambda p:  10 ** (p), np.arange(-1,3).tolist()))+[0]);
+    rho_list = [0];#0.2
 # rename rho to rho
-    xi1_list = [0.5];#[0.01];#sorted(list(map(lambda p:  10 ** (p), np.arange(-1,3).tolist()))+[0]);
+    xi1_list = [0.1];#[0.01];#sorted(list(map(lambda p:  10 ** (p), np.arange(-1,3).tolist()))+[0]);
     xi2_list = [0.1];#[1];#sorted(list(map(lambda p:  10 ** (p), np.arange(-1,3).tolist()))+[0]);##[.1];#sorted(list(map(lambda p:  10 ** (p), np.arange(0,3).tolist()))+[0])
     xi3_list = [1e9];
 else:
@@ -171,8 +171,9 @@ day_month = "28_Feb"; #6_Jan has some interesting stuff,
 base_model_name = 'k2_model' # note: all the rho-sig sims should really fall into a model folder...
 model_suffix = "conventional_BED\\"#"comparing_conventionals\\";
 case = "test";#finalRunCvary for varying C. doseCheckRho means that the rho is constant. 
+
 if goldenLaptopQ:
-    base_dirGD = 'C:\\Users\\jhvo9\\Google Drive (vojh1@uci.edu)';#"/DFS-L/DATA/lowengrub/vojh1";#"C:\\Users\\jhvo9\\Google Drive (vojh1@uci.edu)"
+    base_dirGD = 'C:\\Users\\jhvo9\\Documents'#Google Drive (vojh1@uci.edu)';#"/DFS-L/DATA/lowengrub/vojh1";#"C:\\Users\\jhvo9\\Google Drive (vojh1@uci.edu)"
 else:
     base_dirGD = "G:\\My Drive"
 drty = base_dirGD + "\\a PhD Projects\\GBM Modeling\\python scripts\\data\\"+base_model_name+"\\"+model_suffix+"\\"+case+"\\"+day_month; # _div_rate_diff
@@ -185,7 +186,11 @@ if kimReprogQ:
     sub_drty = "\\kim_reprog";
 else:
     sub_drty = "\\corrected_reprog";
-total_drty = drty + deathVal_dir + sub_drty;
+if kimDynamQ:
+    dyn_str = "\\kim_dynam";
+else:
+    dyn_str = "\\new_dynam";
+total_drty = drty + deathVal_dir + sub_drty + dyn_str;
 if not exists(total_drty):
     makedirs(total_drty);
 if compDosesQ:
@@ -201,6 +206,7 @@ if deathFdbkQ:
     deathFdbk_str="_w_death_fdbk";
 else:
     deathFdbk_str="_w_no_death_fdbk";
+    
 print(deathVal_dir + '\\' + sub_drty+comp_str+deathFdbk_str);
 if compDosesQ:
     variegator = Doses; #outer loop will put the unchanging vector first
@@ -304,13 +310,16 @@ for lll in rng:
                             
                                             #### Saving Data
                                             if saveQ:
-                                                print("Saving", total_drty_rho_sig+"\\TU_"+fix_str+str(comp_list[k])+'_'+comp_str+'_'+str(Frac_list[k])+'_Fracs_'+str(post_therapy_end)+'days_'+deathFdbk_str+"_"+s_useMuQ+"_"+str(lll)+".txt")
-                                                np.savetxt(
-                                                    total_drty_rho_sig+"\\TU_"+fix_str+str(comp_list[k])+'_'+comp_str+'_'+str(Frac_list[k])+'_Fracs_'+str(post_therapy_end)+'days_'+deathFdbk_str+"_"+s_useMuQ+"_"+str(lll)+".txt",
+                                                t1 = total_drty_rho_sig+"\\TU_"+fix_str+str(comp_list[k])+'_'+comp_str+'_'+str(Frac_list[k])+'_Fracs_'+str(post_therapy_end)+'days_'+deathFdbk_str+"_"+s_useMuQ+"_"+str(lll)+".txt";
+                                                print("Saving", t1)
+                                                
+                                                np.savetxt(t1
+                                                    ,
                                                     [t_vec[k], u_sc[k], u_dc[k], u_srv[k]],
                                                     header="Time, CSC, DCC, SRV")
-                                                print("Saving", total_drty_rho_sig+"\\TU_none_"+fix_str+str(comp_list[k])+'_'+comp_str+'_'+str(Frac_list[k])+'_Fracs_'+str(post_therapy_end)+'days_'+deathFdbk_str+"_"+s_useMuQ+"_"+str(lll)+".txt")
-                                                np.savetxt(
-                                                    total_drty_rho_sig+"\\TU_none_"+fix_str+str(comp_list[k])+'_'+comp_str+'_'+str(Frac_list[k])+'_Fracs_'+str(post_therapy_end)+'days_'+deathFdbk_str+"_"+s_useMuQ+"_"+str(lll)+".txt",
+                                                t2 = total_drty_rho_sig+"\\TU_none_"+fix_str+str(comp_list[k])+'_'+comp_str+'_'+str(Frac_list[k])+'_Fracs_'+str(post_therapy_end)+'days_'+deathFdbk_str+"_"+s_useMuQ+"_"+str(lll)+".txt";
+                                                print("Saving", t2)
+                                                \
+                                                np.savetxt(t2,
                                                     [tn_vec[k], un_sc[k], un_dc[k], un_srv[k]],
                                                     header="Time_n, CSC_n, DCC_n, SRV_n")

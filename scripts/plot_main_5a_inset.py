@@ -92,7 +92,7 @@ T_stop = 1000;
 step = 1;
 
 # ss
-load_temp = [6];#np.arange(12).tolist();#[1,3,5,6,7,10,11];#np.arange(12).tolist();
+load_temp = [7];#np.arange(12).tolist();#[1,3,5,6,7,10,11];#np.arange(12).tolist();
 deathFdbkQ = True;
 death_r2_mult = 1.1;
 log_yscaleQ = True;
@@ -109,11 +109,18 @@ if deathFdbkQ:
 else:
     hd = 0.0;#1e5; 
     deathFdbk_str = "_w_no_death_fdbk";
-kimReprogQ = False;
+kimReprogQ = True;
+kimDynamQ = True;
 if kimReprogQ:
     sub_drty = "kim_reprog";
 else:
     sub_drty = "\\corrected_reprog";
+
+if kimDynamQ:
+    dyn_str = "\\kim_dynam";
+else:
+    dyn_str = "\\new_dynam";
+
 deathVal_dir = '\\death_val_of_kim';
 color = ['r','k','g','b','m'];
 
@@ -138,10 +145,10 @@ if use_muQ:
     #, 1e3,np.infty]
     # sig_vec = [10];#list(map(lambda p: 1 * 10 ** (p), np.arange(0,3).tolist()));
     # rho_vec = [0];#[1/5];#sorted(list(map(lambda p: 2 ** (p), np.arange(0,-5,-1).tolist())) + [1/5]);
-    sig_vec = [3/144];#sorted(list(map(lambda p:  10 ** (p), np.arange(-1,3).tolist()))+[0]);
-    rho_vec = [0.2];#0.2
+    sig_vec = [144/3];#sorted(list(map(lambda p:  10 ** (p), np.arange(-1,3).tolist()))+[0]);
+    rho_vec = [2];#0.2
 # rename rho to rho
-    xi1_vec = [1e1];#[0.01];#sorted(list(map(lambda p:  10 ** (p), np.arange(-1,3).tolist()))+[0]);
+    xi1_vec = [0.1];#[0.01];#sorted(list(map(lambda p:  10 ** (p), np.arange(-1,3).tolist()))+[0]);
     xi2_vec = [0.1];#[1];#sorted(list(map(lambda p:  10 ** (p), np.arange(-1,3).tolist()))+[0]);#np.arange(0.01,0.1,0.01);#[.1];#sorted(list(map(lambda p:  10 ** (p), np.arange(0,3).tolist()))+[0])
     xi3_vec = [1e9];
     s_xi1_vec = ['\\' + str(el) for el in xi1_vec];
@@ -165,13 +172,13 @@ Nsched_vec_str = ['',' (delayed)']
 goldenLaptopQ = True;
 
 if goldenLaptopQ:
-    prefix = "C:\\Users\\jhvo9\\Google Drive (vojh1@uci.edu)";
+    prefix = "C:\\Users\\jhvo9\\Documents\\";
 else:
     prefix = "G:\\My Drive";
 
 base_dir = prefix+"\\a PhD Projects\\GBM Modeling\\python scripts\\data\\k2_model\\"
-base_dir1 = base_dir+"conventional_BED\\"+case+"\\death_val_of_kim\\"+sub_drty;#"conventional_BED\\srv_test\\16_Oct\\death_val_of_kim\\corrected_reprog";
-base_dir2 = base_dir+"fixed_BED\\40\\03_Aug\\death_val_of_kim\\"+sub_drty;
+base_dir1 = base_dir+"conventional_BED\\"+case+"\\death_val_of_kim\\"+sub_drty + dyn_str;#"conventional_BED\\srv_test\\16_Oct\\death_val_of_kim\\corrected_reprog";
+base_dir2 = base_dir+"fixed_BED\\40\\03_Aug\\death_val_of_kim\\"+sub_drty + dyn_str;
 
 save_dir = "G:\My Drive\a PhD Projects\GBM Modeling\python scripts\plots\k2_model\long term steady state sims\12000 days\death feedback"
 

@@ -34,8 +34,8 @@ def dU_dt_less_old(U,t, r1, r2, d, p, h1, h2, hd, z, l, n, sig, mu_bar, rho, xi1
 
 def dU_dt(U,t, r1, r2, d, p, h1, h2, hd, z, l, n, sig, mu_bar, rho, xi1, xi2, ddd, xi3, dsc, hU):
     #function dU = stem_ODE_feedback(t, U, r1, r2, d, p, h, hd, z, l, n, sig, mu_bar, chi)
-    dudt=(2*p/(1+l*U[1]**n)-1)*r1/(1+h1*U[1]**n)*U[0]/(1+hU*U[0]) + rho* xi1*U[2]/(1+xi1*U[2])  * U[1] - dsc * U[0];# 
-    dvdt=2*(1-p/(1+l*U[1]**n))*r1/(1+h1*U[1]**n)*U[0]/(1+hU*U[0]) + U[1] * (r2/(1+h2*U[1]**n) * xi3*U[0]/(1+xi3*U[0]) - d-(1.1*r2-d)*hd*U[1]**n/(1+hd*U[1]**n)-rho* U[2]* xi1/(1+xi1*U[2]) );#
+    dudt=(2*p/(1+l*U[1]**n)-1)*r1/(1+h1*U[1]**n)*U[0]/(1+hU*U[0]) + rho* xi1*U[2]/(1+xi1*U[2])  * U[1] - dsc * U[0];#*(1+rho*U[2]/(1+xi1*U[2]))
+    dvdt=2*(1-p/(1+l*U[1]**n))*r1/(1+h1*U[1]**n)*U[0]/(1+hU*U[0]) + U[1] * (r2/(1+h2*U[1]**n) * xi3*U[0]/(1+xi3*U[0]) - d-(1.1*r2-d)*hd*U[1]**n/(1+hd*U[1]**n)-rho* U[2]* xi1/(1+xi1*U[2]) );#*(1+rho*U[2]/(1+xi1*U[2]))
     dmudt=sig * (mu_bar - U[2]);# * (1/(1+xi2*ddd))
     return np.array([dudt, #- 0*(d+(1.1*r2-d)*hd*U[1]**n/(1+hd*U[1]**n)) * U[0], 
                      dvdt,
@@ -93,7 +93,7 @@ def radiotherapy(U, LQ_para, surv_vec):
     [cont_p_a, cont_p_b, compt_mult, srvn_csc, srvn_dcc, cont_c, useMuQ, eff] = surv_vec;
     SF_U =  eff*np.exp(-a1*D-b1*D**2);
     SF_V = eff*np.exp(-a2*D-b2*D**2);
-    mu_new = (c * D)* useMuQ;  # 2 Nov 2021: added "+ .01428"  #21 Oct 2022: removed "+ .01428"
+    mu_new = (mu + c * D)* useMuQ;  # 2 Nov 2021: added "+ .01428"  #21 Oct 2022: removed "+ .01428"
     v_new = max(0,(1 - min(1,mu_new))*SF_V*v);
     u_new = u*SF_U + min(1,mu_new)*SF_V*v;
     return [u_new,v_new, mu_new,SF_U, SF_V]

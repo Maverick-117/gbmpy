@@ -41,7 +41,7 @@ total_cell_num = 4/3*np.pi*(1 ** 3)*1e9;
 goldenLaptopQ = True;
 compDosesQ = True; #true: yes you're comparing doses; false: no, you're comparing reprogramming versus non-reprogramming
 saveQ = False;
-log_yscaleQ = True;
+log_yscaleQ = False;
 reprogQ = True;
 if reprogQ:
     rp_str = 'reprog';
@@ -50,7 +50,8 @@ else:
 r2 = np.log(2)/3.9;
 n = 1; treat_start = 100;
 
-subSelectQ = True; kimReprogQ = False; kimDeathValQ = True; 
+subSelectQ = True; kimReprogQ = False; kimDeathValQ = True; kimDynamQ = False;
+
 l_w = 10**(-7); # weak feedback on prob
 l_s = 10**3; # strong feedback on prob
 h1 = 10**5; # feedback on css div 
@@ -62,7 +63,7 @@ h2_vec = [0, h2, 0  , 0  , h2  , h2  , 0 ,h2,0  ,h2 , 0 , h2];
 if subSelectQ:
     #lll_vec = [pre_lll_load];
     #lll_vec = [4,8,9];
-    lll_vec = [6];
+    lll_vec = [4];
     #[4,8,9,5,10,11];#[0,1,3,4,8,9,5,10,11];#[4,8,9,5,10,11];
 else:
     lll_vec = list(range(len(l_vec)));
@@ -73,7 +74,7 @@ else:
     log_str = "";
     log_dir = "\\linear_yscale\\"
 ### TO VARY
-deathFdbkQ = True; # false: set death feedback gain to 0; true: don't use the false option
+deathFdbkQ = False; # false: set death feedback gain to 0; true: don't use the false option
 comp_conventional_60_30Q = True;
 
 ### SETTINGS
@@ -93,6 +94,11 @@ if kimReprogQ:
 else:
     pre_sub_drty = "corrected_reprog\\";
 
+if kimDynamQ:
+    dyn_str = "kim_dynam\\";
+else:
+    dyn_str = "new_dynam\\";
+    
 comp_str = "Gy";
 a,b =  np.array([0.17, 0.02]); 
 # Doses = [1, 2, 40/15,34/10,5];
@@ -102,10 +108,10 @@ FracsEmp = [60,30,15   ,10   ,5];
 TotalDoseEmp = [int(DosesEmp[i]*FracsEmp[i]) for i in range(len(DosesEmp))];
 BEDEmp = [TotalDoseEmp[i] * (1+DosesEmp[i]/8.5) for i in range(len(DosesEmp))];
 base_idxs = list(range(1,len(DosesEmp)));
-sig_list = [3/144];#sorted(list(map(lambda p:  10 ** (p), np.arange(-1,3).tolist()))+[0]);
-rho_list = [0.2];#sorted(list(map(lambda p: 2 ** (p), np.arange(0,-3,-1).tolist())) + [0,2]);
+sig_list = [144/3];#sorted(list(map(lambda p:  10 ** (p), np.arange(-1,3).tolist()))+[0]);
+rho_list = [2000000000];#sorted(list(map(lambda p: 2 ** (p), np.arange(0,-3,-1).tolist())) + [0,2]);
 # rename rho to rho
-xi1_list = [0.5];#sorted(list(map(lambda p:  10 ** (p), np.arange(-1,3).tolist()))+[0]);
+xi1_list = [0.1];#sorted(list(map(lambda p:  10 ** (p), np.arange(-1,3).tolist()))+[0]);
 xi2_list = [0.1];#sorted(list(map(lambda p:  10 ** (p), np.arange(-1,3).tolist()))+[0]);#np.arange(0.01,0.1,0.01);#[.1];#sorted(list(map(lambda p:  10 ** (p), np.arange(0,3).tolist()))+[0])
 xi3_list = [1e9];
 days_past_treatment = [30,90,180,360,720];
@@ -188,7 +194,7 @@ for p,ref_idx in enumerate(pick_idx): # per BED (p)
             divR2Fdbk_dir = '\\without_divR2_fdbk';
         fdbk_dirs = probFdbk_dir + divR1Fdbk_dir + divR2Fdbk_dir;
         if goldenLaptopQ:
-            base_dirGD = "C:\\Users\\jhvo9\\Google Drive (vojh1@uci.edu)"
+            base_dirGD = "C:\\Users\\jhvo9\\Documents"#"Google Drive (vojh1@uci.edu)"
         else:
             base_dirGD = "G:\\My Drive"
         for ss, els in enumerate(xi3_list):
@@ -207,7 +213,7 @@ for p,ref_idx in enumerate(pick_idx): # per BED (p)
                             sig = el;
                             s_sig = '\\'+ str(el) + '\\';
                             s_mu_suffix = s_xi1 + s_xi2 + s_xi3 + s_rho + s_sig+ 'Schedule0\\';
-                            sub_drty = pre_sub_drty + s_mu_suffix ;
+                            sub_drty = pre_sub_drty + dyn_str + s_mu_suffix ;
                             data_drty = base_dirGD+"\\a PhD Projects\\GBM Modeling\\python scripts\\data\\"+base_model_name+"\\"+model_suffix+"\\"+case+"\\"+date_data_dir+ deathVal_dir + sub_drty
                             plot_drty = base_dirGD+"\\a PhD Projects\\GBM Modeling\\python scripts\\plots\\"+base_model_name+"\\"+model_suffix+"\\"+case+"\\"+date_plot_dir+deathVal_dir + sub_drty + fdbk_dirs +'\\'+comp_dir+ log_dir
                             if not exists(plot_drty):
@@ -295,7 +301,7 @@ for p,ref_idx in enumerate(pick_idx): # per BED (p)
                                 rel_measure_mun = mun_vec[pulley][post_EOT_trackers[:][:]];
                             else:
                                 # against (60,30)
-                                data_drty_tmp = base_dirGD+"\\a PhD Projects\\GBM Modeling\\python scripts\\data\\"+base_model_name+"\\"+model_suffix+'\\'+case+'\\'+date_data_dir+ deathVal_dir + pre_sub_drty+ s_mu_suffix
+                                data_drty_tmp = base_dirGD+"\\a PhD Projects\\GBM Modeling\\python scripts\\data\\"+base_model_name+"\\"+model_suffix+'\\'+case+'\\'+date_data_dir+ deathVal_dir + sub_drty
                                 s_fr_0 = '_'+str(calc_BED_Frac(a,b,2,BEDEmp[ref_idx]))+'_Fracs_'+str(T_stop)+'days_';        
                                 plot_str_tmp = "TU_"+str(C[0])+"_reprog2.0_Gy"+s_fr_0+deathFdbk_str+"_w_reprog_"+str(lll_load);
                                 plotn_str_tmp = "TU_"+str(C[1])+"_reprog2.0_Gy"+s_fr_0+deathFdbk_str+"_w_no_reprog_"+str(lll_load);
