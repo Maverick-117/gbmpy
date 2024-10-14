@@ -28,7 +28,7 @@ model2Q = False; # true: using vo's survivin-protects-dedifferentiates model and
 goldenLaptopQ = True;
 schedChangeQ = False;
 
-deathFdbkQ = False; # false: set death feedback gain to 0; true: don't use the false option
+deathFdbkQ = True; # false: set death feedback gain to 0; true: don't use the false option
 #useMuQ = True;
 
 # Radiotherapy model
@@ -50,22 +50,25 @@ r1 = np.log(2)/DT; # growth rate of CSC
 r2 = np.log(2)/DT; # growth rate of DCC
 p = .505; # self renewal probability 
 l_w = 10**(-7); # weak feedback on prob
-l_s = 10**3; # strong feedback on prob
+l_s = 10**5; # strong feedback on prob
 h1 = 10**5; # feedback on css div 
-h2 = 10**5; # feedback on dcc div
+h2 = 10**(5); # feedback on dcc div
 pwr = 3;#Inf;
 ROI_radius = 1; # Radius of the simulation region of intrest
 #rho = 10**9; # density of cells in the region of interest (cells/cm^3)
 total_cell_num = 4/3*np.pi*(ROI_radius ** 3)*10**9;
 post_therapy_end = 1000;
 #mu_start = 0.0143;
-ss = [4];#[3,5,10,11];#np.arange(12).tolist();#np.arange(12).tolist();#[6];#[4,8,9,5,10,11];
+ss = [0];#[0,1,2,3,4,5,6,7,8,9,10,11];#[3,5,10,11];#np.arange(12).tolist();#np.arange(12).tolist();#[6];#[4,8,9,5,10,11];
 #[0,1,3,4,8,9,5,10,11];#[4,8,9,5,10,11];[0,1,2,3,6,7]
 z = 1; n = 1;
 l_vec =  [0,  0, l_w, l_s, l_w , l_s , 0 ,0 ,l_w,l_w,l_s,l_s];
 h1_vec = [0, h1, 0  , 0  , h1  , h1  , h1,0 ,h1 ,0  , h1, 0 ];
 h2_vec = [0, h2, 0  , 0  , h2  , h2  , 0 ,h2,0  ,h2 , 0 , h2];
 dsc = 0;
+
+cont_p_a = 0;
+
 # man-behind-the-curtain setup.
 switch_vec = [subSelectQ, use_muQ, compDosesQ, deathFdbkQ, c_dep_sQ, kimReprogQ, kimDeathValQ, kimICQ, model0Q, model1Q, model2Q];
 misc_pars = [DT, post_therapy_end, pwr, h1, h2, l_vec, ss, a, b];
@@ -76,15 +79,15 @@ hd_str_mod, v_suffix, v_suffix_save_A, v_suffix_save, fg_subtitle, reprog_suffix
 # the rho above gets over-ridden later on
 
 #stray parameters to setup
-total_start_cell_num = total_cell_num*total_start_frac;
+#total_start_cell_num = total_cell_num*total_start_frac;
 cont_p_b = 10*cont_p_a; compt_mult = 100; # control the strength of inhibitory signal
 srvn_zeta = [3.6, 0.05]; # defunct
 srvn_csc = srvn_zeta[0]; srvn_dcc = srvn_zeta[1]; # defunct
 if use_muQ:
-    sig_list = [144/3];#[0.1];#sorted(list(map(lambda p:  10 ** (p), np.arange(-1,3).tolist()))+[0]);
+    sig_list = [1];#,[144/3];#[0.1];#sorted(list(map(lambda p:  10 ** (p), np.arange(-1,3).tolist()))+[0]);
     rho_list = [0];#0.2
 # rename rho to rho
-    xi1_list = [0.1];#[0.01];#sorted(list(map(lambda p:  10 ** (p), np.arange(-1,3).tolist()))+[0]);
+    xi1_list = [1];#[0.01];#sorted(list(map(lambda p:  10 ** (p), np.arange(-1,3).tolist()))+[0]);
     xi2_list = [0.1];#[1];#sorted(list(map(lambda p:  10 ** (p), np.arange(-1,3).tolist()))+[0]);##[.1];#sorted(list(map(lambda p:  10 ** (p), np.arange(0,3).tolist()))+[0])
     xi3_list = [1e9];
 else:
@@ -106,71 +109,10 @@ d *= 1;
 time_pts1 = 700;
 time_pts2 = 700;
 
-'''cases list
-Srvn_test = model1Q is True
-Srvn_test2 = model2Q is True
-
-mu_test := using the one-at-a-time solving, sig = 0.475
-mu_test2 := using regular solving, sig = infty
-mu_test3 := using regular solving, sig = 0.475
-
-mu_testA0 := using regular solving, sig = infty, all components mu-ized
-mu0 := using regular solving, all mu-ized, sigs = .475, 1e3, 1e10, infty
-mu1 := using OAT solving, sig = 1e10
-muN := the above, but forcing sig = 0
-muNN := attempt to recover old results, mu_start = 0;
-muNN-nz := mu_start = mu_bar.
-muNN-nz-f0 := I think i fixed it all
-muNN-nz-f1 := ...maybe not (SF = 1)
-muNN-nz-f2 := fixed initial condition
-muNN-nz-f3 := modifying John's idea
-muNN-l0 := lowengrub looks it over
-muNN-l1 := fuck, use model0Q here.
-muNN-l2 := fuck, removed line 2 for u_upd here.
-muNN-la0 := trying the above but with regular solving
-
-reprod_old3b := turns out that the older results were erroneous due to a rather sparse mesh...
-                using time_pts1 = time_pts2 = 1000 helped
-muNN-l4 := removing the mu_new = 0 limiter from radiotherapy()
-muNN-l5 := removing the mu_new = 0 limiter from radiotherapy() and using rho = 1/5 for T_stop = 200 or 1100
-muNN-l50 := removing the mu_new = 0 limiter from radiotherapy() and using rho = 0
-muNN-l6 := adding ZZ = .0143 to mu_bar, mu_start, and to the radiotherapy schedule
-muNN-l6a := muNN-l6 but not adding ZZ to mu_start
-muNN-l5q := muNN=l5, but deleting 'discrete' reprogramming from non-radiotherapy sessions (apply discrete reprogramming across all time points as opposed to just at radiotherapy to make comparisons of radiotherapy over time more self-consistent)
-            ...turns out that this is a horrible idea insofar as letting sigma -> infty bring us back to our non-mu results. keep the discrete and continuous reprogramming together
-muNN-l7 := muNN-l6 but adding CSC death term
-muNN-l7a := muNN-l6 but adding CSC death term with severe CSC death rate, rel to DCC death rate
-muNN-l6b := muNN-l5 but not adding ZZ to mu_start and mu_bar
-muNN-l2a := re-verifying that including upating is not necessary
-muNN-l2b := re-verifying that including upating is not necessary and using regular solving
-regular solving seems to get the job done now...vary rho and sigma
-
-mu_besi := the rho-sigma variation saga
-
-##########################################
-
-baseline := the no mu case recreated for feedback 6
-baseline2 := baseline but with new CSC death (ignore, no longer really need it though might use a bit to tweak things)
-baseline_beta := baseline, where radiotherapy_mu0 and rho = 0 (this is redundant) are used, preventing mu from being produced
-
-
-baseline_beta0_RT_OG := attempt to recover non-monotonicity of treatment for fixed BED
-baseline_beta0_RT_OG2 := redux of above
-
-reversionAttempt4 := intended to revert to...the Yu case and see if results varied with parameter scale
-reversionAttempt5 := same as 4, but a better version...somehow. possibly just extending the time?
-scheduleAdjustment := modifying the schedule to see how it affects dynamics
-reversionAttempt6 := ...fuck i messed up the positive feedback term
-
-reversionAttempt6a (debug0) := no xi1's in the numerator
-
-debug2 := xi1 in dU/dt and dV/dt's numerator
-feedbackCheck := trying different kinds of feedback for the V-only feedback regimes. also tried a 1000000 day run
-'''
-day_month = "28_Feb"; #6_Jan has some interesting stuff,
+day_month = '4_June';#"28_Feb"; #6_Jan has some interesting stuff,
 base_model_name = 'k2_model' # note: all the rho-sig sims should really fall into a model folder...
 model_suffix = "conventional_BED\\"#"comparing_conventionals\\";
-case = "test";#finalRunCvary for varying C. doseCheckRho means that the rho is constant. 
+case = 'final'#"test";#finalRunCvary for varying C. doseCheckRho means that the rho is constant. 
 
 if goldenLaptopQ:
     base_dirGD = 'C:\\Users\\jhvo9\\Documents'#Google Drive (vojh1@uci.edu)';#"/DFS-L/DATA/lowengrub/vojh1";#"C:\\Users\\jhvo9\\Google Drive (vojh1@uci.edu)"
@@ -273,14 +215,13 @@ for lll in rng:
                                                 
                                             sc_start = total_start_frac*F;
                                             tc_start = total_start_frac-sc_start;
-                                            total_cell_num = 4/3*np.pi*10**9
-                                            total_start_num = total_start_frac*total_cell_num
+                                            #total_cell_num = 4/3*np.pi*10**9
+                                            #total_start_num = total_start_frac*total_cell_num
                                             
                                             # Defining treatment days and ODE simulation start time after each fraction
                                             weeks = int(frac_num//5);
                                             total_days = frac_num + 2*weeks;
                                             acq_end = treat_start + post_therapy_end;#treat_start + total_days + acq_days_after_RT - 1;
-                                            treat_days = np.tile([1,1,1,1,1,0,0], weeks+1)[:total_days].nonzero()[0]+treat_start;
                                             # if N_sched >= 1:
                                             #     if frac_num > 1:
                                             #         treat_days[1] = treat_days[-1]+1;
@@ -291,7 +232,25 @@ for lll in rng:
                                             #         sim_resume_days2.append();
                                             #     else:
                                             #         sim_resume_days2[i]+=10/(60*24);
+                                            
+                                            '''
+                                            acq_end = treat_start + post_therapy_end;#treat_start + total_days + acq_days_after_RT - 1;
+                                            treat_days = np.tile([1,1,1,1,1,0,0], weeks+1)[:total_days].nonzero()[0]+treat_start;
                                             sim_resume_days = treat_days+10/(60*24); # ODE simulation resumes 10 minutes after RT
+                                            '''
+                                          
+                                            
+                                            
+                                            regimen = np.tile([1,1,1,1,1,0,0], weeks+1)[:total_days]; visits = regimen.nonzero()[0];
+                                            pre_treat_days = np.zeros(total_days);
+                                            pre_sim_resume_days = np.zeros(total_days);
+                                            for v in visits:
+                                                for i in range(regimen[v]):
+                                                    pre_treat_days[v+i] = v+treat_start+20/(60*24)*(i);
+                                                    pre_sim_resume_days[v+i]=v+treat_start+10/(60*24)*(2*i+1);
+                                            treat_days = pre_treat_days[pre_treat_days.nonzero()];
+                                            sim_resume_days = pre_sim_resume_days[pre_sim_resume_days.nonzero()]; # ODE simulation resumes 10 minutes after RT
+                                            
                                             treat_days = np.array(treat_days.tolist() + [acq_end]);  
                                             LQ_param = [a1, b1, a2, b2, c, D];
                                             surv_vec = [cont_p_a, cont_p_b, compt_mult, srvn_csc, srvn_dcc, cont_c, useMuQ, eff]; #assuming these control parameters are constant                                        

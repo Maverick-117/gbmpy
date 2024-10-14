@@ -31,6 +31,18 @@ class MplColorHelper:
   def get_rgb(self, val):
     return self.scalarMap.to_rgba(val)
 
+BASE_SIZE = 15;
+SMALL_SIZE = 1.75 * BASE_SIZE;
+MEDIUM_SIZE = 2.0 * BASE_SIZE;
+LARGE_SIZE = 2.5 * BASE_SIZE;
+
+mpl.rc('font', size=BASE_SIZE)          # controls default text sizes
+mpl.rc('axes', titlesize=LARGE_SIZE)     # fontsize of the axes title
+#mpl.rc('axes', labelsize=SMALL_SIZE)    # fontsize of the x and y labels
+mpl.rc('xtick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
+mpl.rc('ytick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
+mpl.rc('legend', fontsize=BASE_SIZE)    # legend fontsize
+mpl.rc('figure', titlesize=LARGE_SIZE)  # fontsize of the figure title
 
 font = {'weight' : 'bold',
         'size'   : 13}
@@ -63,7 +75,7 @@ h2_vec = [0, h2, 0  , 0  , h2  , h2  , 0 ,h2,0  ,h2 , 0 , h2];
 if subSelectQ:
     #lll_vec = [pre_lll_load];
     #lll_vec = [4,8,9];
-    lll_vec = [4];
+    lll_vec = [0];#0,1,6,7
     #[4,8,9,5,10,11];#[0,1,3,4,8,9,5,10,11];#[4,8,9,5,10,11];
 else:
     lll_vec = list(range(len(l_vec)));
@@ -74,15 +86,15 @@ else:
     log_str = "";
     log_dir = "\\linear_yscale\\"
 ### TO VARY
-deathFdbkQ = False; # false: set death feedback gain to 0; true: don't use the false option
+deathFdbkQ = True; # false: set death feedback gain to 0; true: don't use the false option
 comp_conventional_60_30Q = True;
-
 ### SETTINGS
 base_model_name = 'k2_model'
-#case = "34";
 model_suffix = "conventional_BED"#
-date_data_dir = '28_Feb\\'
+case = 'schedule_11111'#'test'
+date_data_dir = '13_Dec\\'#'28_Feb\\'
 date_plot_dir = '28_Mar\\'; 
+print("evaluating directory:",'\\'+case+'\\'+date_data_dir)
 # 11_Dec, T_stop = 1200 and add some post-EOT times to see the minor but clear evidence that post-1 year dynamics aren't flat
 if kimDeathValQ:
     deathVal_dir = 'death_val_of_kim\\';
@@ -98,7 +110,8 @@ if kimDynamQ:
     dyn_str = "kim_dynam\\";
 else:
     dyn_str = "new_dynam\\";
-    
+s_p = ""; s_ru = ""; s_rv = ""; s_d = "";
+
 comp_str = "Gy";
 a,b =  np.array([0.17, 0.02]); 
 # Doses = [1, 2, 40/15,34/10,5];
@@ -108,13 +121,13 @@ FracsEmp = [60,30,15   ,10   ,5];
 TotalDoseEmp = [int(DosesEmp[i]*FracsEmp[i]) for i in range(len(DosesEmp))];
 BEDEmp = [TotalDoseEmp[i] * (1+DosesEmp[i]/8.5) for i in range(len(DosesEmp))];
 base_idxs = list(range(1,len(DosesEmp)));
-sig_list = [144/3];#sorted(list(map(lambda p:  10 ** (p), np.arange(-1,3).tolist()))+[0]);
-rho_list = [2000000000];#sorted(list(map(lambda p: 2 ** (p), np.arange(0,-3,-1).tolist())) + [0,2]);
+sig_list = [1];#sorted(list(map(lambda p:  10 ** (p), np.arange(-1,3).tolist()))+[0]);
+rho_list = [0];#sorted(list(map(lambda p: 2 ** (p), np.arange(0,-3,-1).tolist())) + [0,2]);
 # rename rho to rho
-xi1_list = [0.1];#sorted(list(map(lambda p:  10 ** (p), np.arange(-1,3).tolist()))+[0]);
+xi1_list = [0];#sorted(list(map(lambda p:  10 ** (p), np.arange(-1,3).tolist()))+[0]);
 xi2_list = [0.1];#sorted(list(map(lambda p:  10 ** (p), np.arange(-1,3).tolist()))+[0]);#np.arange(0.01,0.1,0.01);#[.1];#sorted(list(map(lambda p:  10 ** (p), np.arange(0,3).tolist()))+[0])
 xi3_list = [1e9];
-days_past_treatment = [30,90,180,360,720];
+days_past_treatment = [30,90,180,360,720,900];
 pick_idx = [1];
 T_stop = 1000;#int(t_vec.max());
 
@@ -145,25 +158,43 @@ for p,ref_idx in enumerate(pick_idx): # per BED (p)
     elif ref_idx in [0,4]:
         # case = str(TotalDoseEmp[ref_idx]);
         case_str = str(DosesEmp[ref_idx])+" Gy";
-    case = 'test'
+        
+        
+        
+    
+    
+    pwr = 3;
     # case_str = "conventional";
-    C = [ 5.196*10**(-3), 5.196*10**(-3)];
+    C = [ 5.196*10**(-pwr), 5.196*10**(-pwr)];
     fix_str = str(C[0])+"_reprog";
     comp_dir = "Gy_vs_conv"
     comp_list = Doses;
     unit = ' Gy';
     csr = Doses[::-1];
-    color = ['r','k','g','b','m'];
-    
-        
+    color = ['r','k','g','b','m'];    
     if deathFdbkQ:
         hd = 32520.32520325203;#1e5; 
         deathFdbk_str = "_w_death_fdbk";
     else:
         hd = 0.0; 
         deathFdbk_str= "_w_no_death_fdbk";
+    lll_load = lll_vec[0];
+    if l_vec[lll_load] > 0:
+        s_p = "p, ";
+    if h1_vec[lll_load] > 0:
+        s_ru = "r_u, ";
+    if h2_vec[lll_load] > 0:
+        s_rv = "r_v (SF_U)"
+    if deathFdbkQ:
+        s_d = "d";
+    if l_vec[lll_load]+h1_vec[lll_load]+h2_vec[lll_load]+hd > 0:
+        s_title = "Feedback on " +s_p + s_ru + s_rv + s_d;
+    else:
+        s_title = "Baseline Model";
     ### PLOTTING
     for lll_load in lll_vec:
+        
+
         total_vec = tp.tolist(); csc_frac_vec = tp.tolist();
         totaln_vec = tp.tolist(); cscn_frac_vec = tp.tolist();
         EOT_vec = tp.tolist();
@@ -177,6 +208,7 @@ for p,ref_idx in enumerate(pick_idx): # per BED (p)
         probFdbkQ = l > 0;
         divR1FdbkQ = h1 > 0;
         divR2FdbkQ = h2 > 0;
+        
         #directory hunting
         if probFdbkQ:
             probFdbk_dir = '\\with_prob_fdbk';
@@ -343,7 +375,8 @@ for p,ref_idx in enumerate(pick_idx): # per BED (p)
                                 results_mtx[p,tt,uu,ss,ww,vv,ddd,:,5] = np.cumsum(mun_vec[tt][uu][ss][ww][vv][ddd])[post_EOT_trackers[ddd]]
                 
 
-s_title = "(l:"+f"{l:.3}"+";h1:"+f"{h1:.3}"+";h2:"+f"{h2:.3}"+";hd:"+f"{hd:.3}"+")"
+#s_title = "(l:"+f"{l:.3}"+";h1:"+f"{h1:.3}"+";h2:"+f"{h2:.3}"+";hd:"+f"{hd:.3}"+")"
+
 plot_save_suffix = '_'+fix_str+'_'+str(T_stop)+'days_'+deathFdbk_str+'_w_reprog_'+str(lll_load);
 dosesLabel = [int(d) if int(d) == d else round(d,2) for d in np.unique(Doses)];
 if not comp_conventional_60_30Q:
@@ -403,7 +436,12 @@ else:
 #                             figT.savefig(plot_drty+"\\total_size_dosage_"+str(days_past_treatment[p])+" days"+plot_save_suffix+".png",dpi=300)
 #                             figC.savefig(plot_drty+"\\csc_frac_dosage_"+str(days_past_treatment[p])+" days"+plot_save_suffix+".png",dpi=300)
 
+
+#append = "";
+#if not deathFdbkQ:
+#    append = ", "
 for q,b in enumerate(pick_idx):
+
     # fixing sigma and letting time vary in the graph
     if b == 1:
         tl_suffix_a = 'conventional)'
@@ -416,8 +454,8 @@ for q,b in enumerate(pick_idx):
             for ww, elr in enumerate(rho_list):
                 for vv, el in enumerate(sig_list):
                     tl_suffix = tl_suffix_a  + 'ξ1:' + str(elt) + ',ξ2:' + str(elu) + ';ρ:'+ str(elr)+ ';σ:' + str(el)
-                    figTt, axTt = plt.subplots(figsize=(9,4))
-                    figCt, axCt = plt.subplots(figsize=(9,4))
+                    figTt, axTt = plt.subplots(figsize=(9,6))
+                    figCt, axCt = plt.subplots(figsize=(9,6))
                     COL = MplColorHelper('cool', 0, len(days_past_treatment)-1)
         
                     for p,d in enumerate(days_past_treatment):
@@ -425,26 +463,34 @@ for q,b in enumerate(pick_idx):
                         axCt.plot(Doses,results_mtx[q,tt,uu,ss,ww,vv,:,p,c2],'o',color=COL.get_rgb(p),label=str(d))
                     
                     if log_yscaleQ:
-                        # axTt.set_yscale('log');
+                        axTt.set_yscale('log');
                         axCt.set_yscale('log');
-                    axTt.set_title("total size; "+rp_str+'('+tl_suffix)
-                    axTt.set_ylabel("Total Size(Dose)/Total Size"+yl_suffix,fontsize = 11)
-                    axTt.set_xlabel("Dose per Frac (Gy)",fontsize = 11)
+                    #axTt.set_yscale('log');
+                    axTt.set_title(s_title);#rp_str+'('+tl_suffix)
+                    #axTt.set_ylabel("Total Size(Dose)/Total Size"+yl_suffix,fontsize = MEDIUM_SIZE)
+                    axTt.set_ylabel("Relativized Total Size (log)",fontsize = 0.9*MEDIUM_SIZE)
+                    axTt.set_xlabel("Dose per Frac (Gy)",fontsize = MEDIUM_SIZE)
                     legTt = axTt.legend(fancybox=True, framealpha=0.5, title = "days after EOT",loc='center left', bbox_to_anchor=(1, 0.5))
                     axTt.set_xticks(dosesLabel)
                     axTt.set_xticklabels(dosesLabel,  rotation = 45, ha="right")
-                    # axTt.set(ylim=(0.6,1.6),autoscale_on=False)
+                    axTt.set(ylim=(0.0,2.0),autoscale_on=False)
                     legTt.set_in_layout(True)
                     figTt.tight_layout()
+                    axTt.axhline(1, color = 'g',linewidth=2.0)
+                    
                     legCt = axCt.legend(fancybox=True, framealpha=0.5, title = "days after EOT",loc='center left', bbox_to_anchor=(1, 0.5))
-                    axCt.set_title("csc frac; "+rp_str+'('+tl_suffix)
-                    axCt.set_ylabel("CSC Frac(Dose)/CSC Frac"+yl_suffix,fontsize = 11)
-                    axCt.set_xlabel("Dose per Frac (Gy)",fontsize = 11)
+                    axCt.set_title(s_title);#rp_str+'('+tl_suffix)
+                    #axCt.set_ylabel("CSC Frac(Dose)/CSC Frac"+yl_suffix,fontsize = MEDIUM_SIZE)
+                    axCt.set_ylabel("Relativized CSC Frac",fontsize = MEDIUM_SIZE)
+                    axCt.set_xlabel("Dose per Frac (Gy)",fontsize = MEDIUM_SIZE)
                     axCt.set_xticks(dosesLabel)
                     axCt.set_xticklabels(dosesLabel, rotation = 45, ha="right")
-                    # axCt.set(ylim=(0.8,2.0),autoscale_on=False)
+                    axCt.set(ylim=(0.0,2.0),autoscale_on=False)
                     legCt.set_in_layout(True)
                     figCt.tight_layout()
+                    axCt.axhline(1, color = 'g',linewidth=2.0)
+                    plt.show()
+                    plt.show()
                     if saveQ:
                         # figTt.savefig(plot_drty+"\\total_size_dosage_("+str(DosesEmp[b])+","+str(FracsEmp[b])+")_"+plot_save_suffix+".png",dpi=300)
                         figCt.savefig(plot_drty+  "\\csc_frac_dosage_("+str(DosesEmp[b])+","+str(FracsEmp[b])+")_"+plot_save_suffix+".png",dpi=300)
@@ -473,15 +519,16 @@ for q,b in enumerate(pick_idx):
                     if log_yscaleQ:
                         axM.set_yscale('log');
                         #axMn.set_yscale('log');
-                    axM.set_title("Cum. mu(RT reprog); "+'('+tl_suffix)
-                    axM.set_ylabel("Cum. mu (Dose)",fontsize = 11)
-                    axM.set_xlabel("Dose per Frac (Gy)",fontsize = 11)
+                    axM.set_title("Cum. mu(RT reprog); "+s_title);#'('+tl_suffix)
+                    axM.set_ylabel("Cum. mu (Dose)",fontsize = MEDIUM_SIZE)
+                    axM.set_xlabel("Dose per Frac (Gy)",fontsize = MEDIUM_SIZE)
                     legM = axM.legend(fancybox=True, framealpha=0.5, title = "days after EOT",loc='center left', bbox_to_anchor=(1, 0.5))
                     axM.set_xticks(dosesLabel)
                     axM.set_xticklabels(dosesLabel,  rotation = 45, ha="right")
                     # axTt.set(ylim=(0.6,1.6),autoscale_on=False)
                     legM.set_in_layout(True)
                     figM.tight_layout()
+                    plt.show()
                     # legMn = axMn.legend(fancybox=True, framealpha=0.5, title = "days after EOT",loc='center left', bbox_to_anchor=(1, 0.5))
                     # axMn.set_title("Cum. mu(no RT reprog); "+'('+tl_suffix)
                     # axMn.set_ylabel("Cum. mu (Dose)",fontsize = 11)

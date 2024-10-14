@@ -33,14 +33,38 @@ def dU_dt_less_old(U,t, r1, r2, d, p, h1, h2, hd, z, l, n, sig, mu_bar, rho, xi1
     # make simulations, argue from equations
 
 def dU_dt(U,t, r1, r2, d, p, h1, h2, hd, z, l, n, sig, mu_bar, rho, xi1, xi2, ddd, xi3, dsc, hU):
-    #function dU = stem_ODE_feedback(t, U, r1, r2, d, p, h, hd, z, l, n, sig, mu_bar, chi)
-    dudt=(2*p/(1+l*U[1]**n)-1)*r1/(1+h1*U[1]**n)*U[0]/(1+hU*U[0]) + rho* xi1*U[2]/(1+xi1*U[2])  * U[1] - dsc * U[0];#*(1+rho*U[2]/(1+xi1*U[2]))
-    dvdt=2*(1-p/(1+l*U[1]**n))*r1/(1+h1*U[1]**n)*U[0]/(1+hU*U[0]) + U[1] * (r2/(1+h2*U[1]**n) * xi3*U[0]/(1+xi3*U[0]) - d-(1.1*r2-d)*hd*U[1]**n/(1+hd*U[1]**n)-rho* U[2]* xi1/(1+xi1*U[2]) );#*(1+rho*U[2]/(1+xi1*U[2]))
+    #last two stage version function dU = stem_ODE_feedback(t, U, r1, r2, d, p, h, hd, z, l, n, sig, mu_bar, chi)
+    dudt=(2*p/(1+l*U[1]**n)-1)*r1/(1+h1*U[1]**n)*U[0]/(1+hU*U[0]) + (rho* xi1*U[2]/(1+xi1*U[2]))  * U[1] - dsc * U[0];#*(1+rho*U[2]/(1+xi1*U[2]))
+    dvdt=2*(1-p/(1+l*U[1]**n))*r1/(1+h1*U[1]**n)*U[0]/(1+hU*U[0]) + U[1] * (r2/(1+h2*U[1]**n) * xi3*U[0]/(1+xi3*U[0]) - d-(1.1*r2-d)*hd*U[1]**n/(1+hd*U[1]**n)-rho* U[2]* xi1/(1+xi1*U[2]));#*(1+rho*U[2]/(1+xi1*U[2]))
     dmudt=sig * (mu_bar - U[2]);# * (1/(1+xi2*ddd))
     return np.array([dudt, #- 0*(d+(1.1*r2-d)*hd*U[1]**n/(1+hd*U[1]**n)) * U[0], 
                      dvdt,
                      dmudt #
                     ])
+
+def dU_dt_three(U,t, r1, r2, d, p, h1, h2, hd, z, l, n, sig, mu_bar, rho, xi1, xi2, ddd, xi3, dsc, hU):
+    #three stage version 
+    dudt=(2*p1/(1+l*U[2]**n)-1)*r1/(1+h1*U[2]**n)*U[0]/(1+hU*U[0]) + (0.01 + rho* xi1*U[3]/(1+xi1*U[3])) * U[1] - dsc * U[0];#*(1+rho*U[2]/(1+xi1*U[2]))
+    dwdt=2*(1-p1/(1+l*U[2]**n))*r1/(1+h1*U[2]**n)*U[0]/(1+hU*U[0]) + (2*p1/(1+l*U[2]**n)-1)*r1/(1+h1*U[2]**n)*U[1]/(1+hU*U[2])
+    dvdt=2*(1-p2/(1+l*U[1]**n))*r1/(1+h1*U[1]**n)*U[0]/(1+hU*U[0]) + U[1] * (r2/(1+h2*U[1]**n) * xi3*U[0]/(1+xi3*U[0]) - d-(1.1*r2-d)*hd*U[1]**n/(1+hd*U[1]**n)-rho* U[2]* xi1/(1+xi1*U[2]) - 0.01 );#*(1+rho*U[2]/(1+xi1*U[2]))
+    dmudt=sig * (mu_bar - U[2]);# * (1/(1+xi2*ddd))
+    return np.array([dudt, #- 0*(d+(1.1*r2-d)*hd*U[1]**n/(1+hd*U[1]**n)) * U[0], 
+                     dwdt,
+                     dvdt,
+                     dmudt #
+                    ])
+
+def dU_dt_expt(U,t, r1, r2, d, p, h1, h2, hd, z, l, n, sig, mu_bar, rho, xi1, xi2, ddd, xi3, dsc, hU):
+    #experimental
+    dudt=(2*(U[0]+U[1])*p/((U[0]+U[1])+l*U[1]**n)-1)*(U[0]+U[1])*r1/((U[0]+U[1])+h1*U[1]**n)*U[0]/(1+hU*U[0]) + rho* xi1*U[2]/(1+xi1*U[2])  * U[1] - dsc * U[0];#*(1+rho*U[2]/(1+xi1*U[2]))
+    dvdt=2*(1-(U[0]+U[1])*p/((U[0]+U[1])+l*U[1]**n))*(U[0]+U[1])*r1/((U[0]+U[1])+h1*U[1]**n)*U[0]/(1+hU*U[0]) + U[1] * (r2/((U[0]+U[1])+h2*U[1]**n)*(U[0]+U[1]) * xi3*U[0]*(U[0]+U[1])/((U[0]+U[1])+xi3*U[0]) - d-(1.1*r2-d)*hd*U[1]**n/((U[0]+U[1])+hd*U[1]**n)-rho* U[2]* xi1/((U[0]+U[1])+xi1*U[2]) );#*(1+rho*U[2]/(1+xi1*U[2]))
+    dmudt=sig * (mu_bar - U[2]);# * (1/(1+xi2*ddd))
+    return np.array([dudt, #- 0*(d+(1.1*r2-d)*hd*U[1]**n/(1+hd*U[1]**n)) * U[0], 
+                     dvdt,
+                     dmudt #
+                    ])
+
+
 def calc_BED_Frac(a,b,Dose,baseline_BED=60*(1+2/8.5)):
     # a = .17, b =.02
     # the baseline BED is set to conventional dosage, by default
@@ -86,16 +110,63 @@ def radiotherapy_kim(U, LQ_para, surv_vec):
     # v_new is used instead of SF_U because radiotherapy causes de-dif
     return [u_new,v_new, s_new,SF_U, SF_V]
 
-def radiotherapy(U, LQ_para, surv_vec):
-    #radiotherapy_mkiii
+def radiotherapy_SFV(U, LQ_para, surv_vec):
+    #radiotherapy_SFV
     u, v, mu = U[:,-1];
     [a1, b1, a2, b2, c, D] = LQ_para;
     [cont_p_a, cont_p_b, compt_mult, srvn_csc, srvn_dcc, cont_c, useMuQ, eff] = surv_vec;
-    SF_U =  eff*np.exp(-a1*D-b1*D**2);
-    SF_V = eff*np.exp(-a2*D-b2*D**2);
     mu_new = (mu + c * D)* useMuQ;  # 2 Nov 2021: added "+ .01428"  #21 Oct 2022: removed "+ .01428"
-    v_new = max(0,(1 - min(1,mu_new))*SF_V*v);
-    u_new = u*SF_U + min(1,mu_new)*SF_V*v;
+    SF_U =  eff*np.exp(-a1/(1+cont_p_a*mu_new)*D-b1/(1+cont_p_b*mu_new)*D**2);
+    SF_V = eff*np.exp(-a2/(1+cont_p_a*mu_new)*D-b2/(1+cont_p_b*mu_new)*D**2);
+    #denom = (a2-a1 + (b2 - b1)*D)*D;
+    v_new = (1 - min(1,mu_new)*useMuQ)*SF_V*v;#max(0,(1 - min(1,mu_new))*SF_V*v);
+    u_new = u*SF_U + min(1,mu_new)*v*useMuQ*SF_V;#u*SF_U + min(1,mu_new)*SF_V*v;
+    return [u_new,v_new, mu_new,SF_U, SF_V]
+
+def radiotherapy(U, LQ_para, surv_vec):
+    #radiotherapy_SFU
+    u, v, mu = U[:,-1];
+    [a1, b1, a2, b2, c, D] = LQ_para;
+    [cont_p_a, cont_p_b, compt_mult, srvn_csc, srvn_dcc, cont_c, useMuQ, eff] = surv_vec;
+    mu_new = (mu + c * D)* useMuQ;  # 2 Nov 2021: added "+ .01428"  #21 Oct 2022: removed "+ .01428"
+    SF_U =  eff*np.exp(-a1/(1+cont_p_a*mu_new)*D-b1/(1+cont_p_b*mu_new)*D**2);
+    SF_V = eff*np.exp(-a2/(1+cont_p_a*mu_new)*D-b2/(1+cont_p_b*mu_new)*D**2);
+    #denom = (a2-a1 + (b2 - b1)*D)*D;
+    v_new = (1 - min(1,mu_new)*useMuQ)*SF_V*v;#max(0,(1 - min(1,mu_new))*SF_V*v);
+    u_new = (u + min(1,mu_new)*v*useMuQ)*SF_U;#u*SF_U + min(1,mu_new)*SF_V*v;
+    return [u_new,v_new, mu_new,SF_U, SF_V]
+
+def radiotherapy_derivation(U, LQ_para, surv_vec):
+    #radiotherapy_derivation
+    u, v, mu = U[:,-1];
+    [a1, b1, a2, b2, c, D] = LQ_para;
+    [cont_p_a, cont_p_b, compt_mult, srvn_csc, srvn_dcc, cont_c, useMuQ, eff] = surv_vec;
+    #mu_new = (mu + c * D)* useMuQ;  # 2 Nov 2021: added "+ .01428"  #21 Oct 2022: removed "+ .01428"
+    
+    mu_spike = 10;
+    
+    SF_U = eff*np.exp(-a1/(1+cont_p_a*mu_spike)*D-b1/(1+cont_p_b*mu_spike)*D**2);
+    SF_V = eff*np.exp(-a2/(1+cont_p_a*mu_spike)*D-b2/(1+cont_p_b*mu_spike)*D**2);
+    #denom = (a2-a1 + (b2 - b1)*D)*D;
+    v_new = (np.exp(-mu_spike)*useMuQ)*SF_V*v;#max(0,(1 - min(1,mu_new))*SF_V*v);
+    
+    u_add = mu_spike/( mu_spike + D*(a2-a1) + D*D*(b2-b1) ) * (SF_U-SF_V*np.exp(-mu_spike))
+    
+    u_new = u*SF_U+v*u_add*useMuQ;#u*SF_U + min(1,mu_new)*SF_V*v;
+    return [u_new,v_new, mu_spike,SF_U, SF_V]
+
+def radiotherapy_post_derivation1(U, LQ_para, surv_vec):
+    #radiotherapy_post_derivation
+    u, v, mu = U[:,-1];
+    [a1, b1, a2, b2, c, D] = LQ_para;
+    [cont_p_a, cont_p_b, compt_mult, srvn_csc, srvn_dcc, cont_c, useMuQ, eff] = surv_vec;
+    mu_new = (mu + c * D)* useMuQ;  # 2 Nov 2021: added "+ .01428"  #21 Oct 2022: removed "+ .01428"
+    SF_U =  eff*np.exp(-a1/(1+cont_p_a*mu_new)*D-b1/(1+cont_p_b*mu_new)*D**2);
+    SF_V = eff*np.exp(-a2/(1+cont_p_a*mu_new)*D-b2/(1+cont_p_b*mu_new)*D**2);
+    #denom = (a2-a1 + (b2 - b1)*D)*D;
+    v_new = (np.exp(-mu_new)*useMuQ)*SF_V*v;#max(0,(1 - min(1,mu_new))*SF_V*v);
+    u_mu_coeff = 5*mu_new/( mu_new + D*(a2-a1) + D*D*(b2-b1) );
+    u_new = (u*SF_U + u_mu_coeff*v*(SF_U-SF_V*np.exp(-mu_new))*useMuQ);#u*SF_U + min(1,mu_new)*SF_V*v;
     return [u_new,v_new, mu_new,SF_U, SF_V]
 
 def radiotherapy_mu0(U, LQ_para, surv_vec):
@@ -207,7 +278,7 @@ def parameter_setup(switch_vec, misc_pars):
     
     # death rate of DCC
     if kimDeathValQ:
-        d  = 1/5 * np.log(2)/DT; 
+        d = 0.2 * np.log(2)/DT; 
         hd_str_mod = '_kim_val'
     else:
         d  = np.log(2)/DT; 
@@ -221,8 +292,19 @@ def parameter_setup(switch_vec, misc_pars):
         # Doses = [1, 2, 40/15, 34/10, 5]; # dose fraction sizes in Gy
         # Frac = [60, 30, 15 ,10, 5]; 
         #Doses = np.arange(1,11).tolist();#, 34/10, 5]; # dose fraction sizes in Gy
+        
+        
+        
+        
+        
+        
         Doses = np.arange(1,12,dtype=float);#np.arange(2,22,2,dtype=float);#sorted(np.arange(1,21,dtype=float).tolist() + [40/15,34/10]);
         Frac = list(map(lambda d: float(np.floor(calc_BED_Frac(.17,.02,d))),Doses)); # 25*(1+(5)/8.5)
+        
+        
+        
+        
+        
         # Doses = [2.0,2.0];#np.sort(np.append(np.arange(1,21),[40/15,34/10])).tolist(); # dose fraction sizes in Gy
         # Frac = [30.0,31.0];#list(map(lambda d:calc_BED_Frac(a,b,d),Doses));#,baseline_BED=25*(1+5/8.5)
         #power_list = 10.0 ** np.arange(-pwr-2,-pwr+3,dtype=int)
